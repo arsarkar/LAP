@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "LAPJVTEST", "LAPJVTEST\LAPJVTEST.vfproj", "{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Debug|Win32.Build.0 = Debug|Win32
+		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Release|Win32.ActiveCfg = Release|Win32
+		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
