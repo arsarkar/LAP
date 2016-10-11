@@ -14,6 +14,7 @@
 
 program LAPJVTEST
     use global
+    use BranchBound
     implicit none
 
     ! Variables
@@ -54,7 +55,11 @@ program LAPJVTEST
     !print cost matrix
     write(output,'(A21)') "cost matrix assigned " 
     write(*,'(A21)') "cost matrix assigned " 
-    call printcostmatrix()
+    !call printcostmatrix()
+    
+    !test branch and bound
+    call DFSBB(c)
+    !call printcostmatrix(c)
     
     !run LAPJV
     !call JOVOFDTEST(n, c, x, y, u, v, z)

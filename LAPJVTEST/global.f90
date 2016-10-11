@@ -8,7 +8,11 @@ module global
         integer :: di
         integer :: wi
         integer :: ri
-    end type jobstruct    
+    end type jobstruct  
+    
+    type cmat
+        integer, allocatable, dimension(:,:) :: m
+    end type cmat    
     
     !job table
     type (jobstruct), dimension(:), allocatable :: jobtable
@@ -17,7 +21,7 @@ module global
     integer :: numjob = 0
     
     !cost matrix
-    integer, dimension(100,100) :: c
+    type(cmat) :: c
     
     !dimension of cost matrix
     integer :: dim = 0
@@ -28,7 +32,8 @@ module global
     contains
     
     subroutine printjobs()
-    
+        implicit none
+        integer:: i
         !print the jobtable
         write(output,20) "Index", "|", "p", "|", "d", "|", "w", "|", "r"
         write(output,*) "------------------------------------"
@@ -40,13 +45,16 @@ module global
 20      format(A5,2X,A1,2X,A3,2X,A1,2X,A3,2X,A1,2X,A3,2X,A1,2X,A3)
     end subroutine printjobs
     
-    subroutine printcostmatrix()
-        
+    subroutine printcostmatrix(nc)
+        implicit none
+        integer:: i, j
+        type(cmat) nc
+        write(output,'(A21)') "cost matrix assigned " 
         !print the cost matrix
         write(output,30) 0, (i,i=1,dim)
         write(output,40) "-----", ("--------",i=1,dim)
         do i= 1, dim
-            write(output, 30) i, (c(i,j), j=1,dim)   
+            write(output, 30) i, (nc%m(i,j), j=1,dim)   
             !write(*,40) "-----", ("--------",j=1,dim)
         end do
         
@@ -54,6 +62,39 @@ module global
 40      format(A5,<dim>(A8))    
     
     end subroutine printcostmatrix
+    
+    subroutine printsolvedmatrix(nc, x, y)
+        implicit none
+        integer:: i, j, k
+        type(cmat) nc
+        integer :: x(dim), y(dim), val
+        character*1000 row
+        character*7 :: cells(dim)
+        !print the cost matrix
+        write(output, '(A21)') "Cost matrix solved..."
+        write(output,10) 0, (i,i=1,dim)
+        write(output,40) "-----", ("--------",i=1,dim)
+        do i= 1, dim
+            k = 1
+            do j =1, dim
+                if (x(i)==j) then
+                    write(cells(k), 20) nc%m(i,j), '*'
+                else
+                    write(cells(k), 20) nc%m(i,j), ' '
+                end if
+                k = k + 1
+            end do    
+            write(output, 30) i, (cells(j), j=1,dim)   
+            !write(*,40) "-----", ("--------",j=1,dim
+        end do
+
+10      format(I5,<dim>(1X,"|",1X,I5))       
+20      format(1X,I5,A)        
+30      format(I5,<dim>("|",A7)) 
+40      format(A5,<dim>(A8))    
+    
+    end subroutine printsolvedmatrix
+    
     
     !****************************************************************************
     !
@@ -70,7 +111,7 @@ module global
     !           n = number of jobs
     !****************************************************************************    
     subroutine readcostmatrix(costfile, n, costmatrix)
-
+        implicit none
        character(150) :: costfile, inputline
        integer, dimension(100,100) :: costmatrix
        integer, dimension(100) :: row
@@ -113,7 +154,7 @@ module global
     !  INPUT: jobfile = full path of job file
     !**************************************************************************** 
     subroutine readjobfile(jobFile)
-
+        implicit none
         character(150) :: jobfile, inputline
         integer :: fileUnit = 10, ioresult, i = 1, j = 1
         integer, dimension(10) :: row
@@ -150,7 +191,7 @@ module global
     !  INPUT: jobfile = full path of job file
     !****************************************************************************
     subroutine assignmatrix()
-
+        implicit none
         integer :: n, i = 1, j = 1, p = 1, col = 1, MAX_INTEGER = 32767
     
         !calculate the total dimensation fo cost matrix
@@ -159,7 +200,9 @@ module global
             dim = dim + jobtable(i).pi
             i = i + 1
         end do    
-    
+        
+        !allocate the cost matrix
+        allocate(c%m(dim,dim))
 
         i = 1
         do while (j <= numjob)
@@ -169,17 +212,17 @@ module global
                 do while (col <= dim) 
                     !assign a large value to column col of row i of cost matrix c if col < due date of job j or col > dim - processing time of job j
                     if (col < jobtable(j).ri + p -1 .OR. col >= dim - jobtable(j).pi + p + 1)  then
-                        c(i,col) = MAX_INTEGER                        
+                        c%m(i,col) = MAX_INTEGER                        
                     else
                         !assign 0 last but all parts of job j 
                         if (p < jobtable(j).pi) then
-                            c(i,col) = 0
+                            c%m(i,col) = 0
                         !for the last part assign the cost of delay calculated by (due date of job j - finishing time) * weight for job j     
                         else 
                             if (col > jobtable(j).di) then 
-                                c(i,col) = (col - jobtable(j).di) * jobtable(j).wi 
+                                c%m(i,col) = (col - jobtable(j).di) * jobtable(j).wi 
                             else 
-                                c(i,col) = 0
+                                c%m(i,col) = 0
                             end if
                         end if   
                     end if
@@ -194,6 +237,9 @@ module global
         end do      
 
     end subroutine assignmatrix
+    
+    
+
    
     
     !****************************************************************************
@@ -216,15 +262,15 @@ module global
     !          Z = Value Of Optimal Solution
     !****************************************************************************   
     subroutine JOVOFDTEST(N,C,X,Y,U,V,Z)
-    
+        
         implicit none
     
         !variable declaration
-        integer :: C(100,100), &            !cost/weight matrix
-                   X(100), &                !col assigned to row
-                   Y(100), &                !row assigned to column
-                   U(100), &                !Dual Row variable
-                   V(100), &                !Dual column variable
+        integer :: C(dim,dim), &            !cost/weight matrix
+                   X(dim), &                !col assigned to row
+                   Y(dim), &                !row assigned to column
+                   U(dim), &                !Dual Row variable
+                   V(dim), &                !Dual column variable
                    N, &                     !number of row and column
                    H, &                     !
                    Z, &                     !value of optimal solution
@@ -235,10 +281,10 @@ module global
                    UP, &                   
                    LOW, &
                    MIN, &
-                   LAB(100), &
-                   D(100), &
-                   FREE(100), &
-                   COL(100)
+                   LAB(dim), &
+                   D(dim), &
+                   FREE(dim), &
+                   COL(dim)
     
         !counter variables
         integer:: I, I0, J, J0, J1, K, L, CNT, LAST
