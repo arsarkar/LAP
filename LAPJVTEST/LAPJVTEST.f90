@@ -15,6 +15,7 @@
 program LAPJVTEST
     use global
     use BranchBound
+    use lapjv
     implicit none
 
     ! Variables
@@ -62,10 +63,11 @@ program LAPJVTEST
     !call printcostmatrix(c)
     
     !run LAPJV
-    !call JOVOFDTEST(n, c, x, y, u, v, z)
+    !call JOVOFDTEST(n, c%, x, y, u, v, z)
     
     !print result
     !write(*, '(A15, I5)')  "Optimal value is ", z
+    !call printsolvedmatrix(c, x, y)
         
     write(*,*) "Please press Enter to continue with next case......"
     read(*,*)   

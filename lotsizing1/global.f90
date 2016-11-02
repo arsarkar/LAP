@@ -63,15 +63,15 @@ module global
     
     end subroutine printcostmatrix
     
-    subroutine printsolvedmatrix(nc, x, y)
+    subroutine printsolvedmatrix(nc, x, y, z)
         implicit none
-        integer:: i, j, k
+        integer:: i, j, k, z
         type(cmat) nc
         integer :: x(dim), y(dim), val
         character*1000 row
         character*7 :: cells(dim)
         !print the cost matrix
-        write(output, '(A21)') "Cost matrix solved..."
+        write(output, '(A40,I5)') "Cost matrix solved with optimal value = ", z
         write(output,10) 0, (i,i=1,dim)
         write(output,40) "-----", ("--------",i=1,dim)
         do i= 1, dim
@@ -237,10 +237,6 @@ module global
         end do      
 
     end subroutine assignmatrix
-    
-    
-
-   
     
     !****************************************************************************
     !
@@ -448,155 +444,5 @@ module global
       100 CONTINUE
 
     end subroutine JOVOFDTEST    
-    
-    !****************************************************************************
-    !
-    !  SUBROUTINE: JOVOFD
-    !
-    !  PURPOSE:  This Subroutine Solves The Full Density Linear Assignment Problem
-    !            According To "A Shortest Augmenting Path Algorithm For Dense And 
-    !            Sparse Linear Assignment Problems," Computing 38, 325-340, 1987
-    !            By R. Jonker And A. Volgenant, University Of Amsterdam.
-    !  
-    !****************************************************************************
-    !  INPUT: N = Number Of Rows And Columns
-    !         C = Weight Matrix
-    !
-    !  Output: X = Col Assigned To Row
-    !          Y = Row Assigned To Col
-    !          U = Dual Row Variable
-    !          V = Dual Column Variable
-    !          Z = Value Of Optimal Solution
-    !****************************************************************************   
-    subroutine JOVOFD(N,C,X,Y,U,V,Z)
-    
-        implicit none
-    
-        !variable declaration
-        integer :: C(100,100), &            !cost/weight matrix
-                   X(100), &                !col assigned to row
-                   Y(100), &                !row assigned to column
-                   U(100), &                !Dual Row variable
-                   V(100), &                !Dual column variable
-                   N, &                     !number of row and column
-                   H, &                     !
-                   Z, &                     ! value of optimal solution
-                   L0, &                    
-                   V0, &                    
-                   VJ, &                    
-                   DJ, &                    
-                   UP, &                   
-                   LOW, &
-                   MIN, &
-                   LAB(100), &
-                   D(100), &
-                   FREE(100), &
-                   COL(100)
-    
-        !loop variables
-        integer:: I, I0, J, J0, J1, L
-
-        !initialization
-    
-        !initialize row assignment matrix
-        do I=1,N 
-           X(I)=0
-        end do
-    
-        do J0=1,N
-           J=N-J0+1
-           VJ=C(J,1)
-           I0=1
-           do I=2,N
-              if (C(J,I) .lt. VJ) then
-                 VJ=C(J,I)
-                 I0=I
-              end if
-           end do    
-           V(J)=VJ
-           COL(J)=J
-           if (X(I0) .eq. 0) then
-              X(I0)=J
-              Y(J)=I0
-           else
-              X(I0)=-ABS(X(I0))
-              Y(J)=0
-           end if
-        end do   
-        L=0
-        do I=1,N
-           if (X(I) .eq. 0) then
-               L=L+1
-               FREE(L)=I
-               continue
-           end if
-           if (X(I) .lt. 0) then
-               X(I)=-X(I)
-           else
-               J1=X(I)
-               MIN=1.E14
-               do J=1,N
-                   if (J .eq. J1) continue
-                   if (C(J,I)-V(J) .lt. MIN) then
-                       MIN=C(J,I)-V(J)
-                   end if
-               end do
-               V(J1)=V(J1)-MIN
-           end if
-        end do
-    
-       ! !improve the initial solution
-       ! CNT=0
-       ! IF (L.EQ.0) then
-       ! do while ((L.GT.0).AND.(CNT.LT.2))
-       !     L0=L
-       !     K=1
-       !     L=0
-       !     do while (K.LE.L0)
-       !         I=FREE(K)
-       !         K=K+1
-       !         V0=C(1,I)-V(1)
-       !         J0=1
-       !         VJ=1.E14
-       !         do J=2,N
-       !             H=C(J,I)-V(J)
-       !             if (H.LT.VJ) then
-       !                 if (H.GE.V0) then
-       !                     VJ=H
-       !                     J1=J
-       !                 else
-       !                     VJ=V0
-       !                     V0=H
-       !                     J1=J0
-       !                     J0=J
-       !                 end if
-       !             end if
-       !         end do
-       !     I0=Y(J0)
-       !     if (V0.LT.VJ) then
-       !         V(J0)=V(J0)-VJ+V0
-       !     else
-       !         if (I0.EQ.0) GOTO 43
-       !     J0=J1
-       !     I0=Y(J1)
-       !   END IF
-       !   IF (I0.EQ.0) GOTO 43
-       !   IF (V0.LT.VJ) THEN
-       !     K=K-1
-       !     FREE(K)=I0
-       !   ELSE
-       !     L=L+1
-       !     FREE(L)=I0
-       !   END IF
-       !43 X(I)=J0
-       !   Y(J0)=I
-       !   end do
-       !   CNT=CNT+1
-       ! end do
-       !
-       ! !augmentation part      
-       !   
-       ! end if  
-    end subroutine JOVOFD    
     
 end module    

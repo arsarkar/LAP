@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioUserFile ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}">
 	<Configurations>
-		<Configuration Name="Debug|Win32" CommandArguments="jobfile1.txt output.txt"/>
+		<Configuration Name="Debug|Win32" CommandArguments="jobfile3.txt output.txt"/>
 		<Configuration Name="Release|Win32"/>
 		<Configuration Name="Intel_SSA|Win32" CommandArguments="jobfile1.txt output.txt"/></Configurations></VisualStudioUserFile>

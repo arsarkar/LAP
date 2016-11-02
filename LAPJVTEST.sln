@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "LAPJVTEST", "LAPJVTEST\LAPJVTEST.vfproj", "{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8} = {2FA5D6C6-3123-410C-9848-349B4DA23EB8}
+	EndProjectSection
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "lotsizing1", "lotsizing1\lotsizing1.vfproj", "{2FA5D6C6-3123-410C-9848-349B4DA23EB8}"
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "jv", "jv\jv.vfproj", "{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,6 +23,18 @@ Global
 		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Intel_SSA|Win32.Build.0 = Intel_SSA|Win32
 		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Release|Win32.ActiveCfg = Release|Win32
 		{8504B6E8-978F-4C35-AE54-9CF83DB47ACD}.Release|Win32.Build.0 = Release|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Debug|Win32.Build.0 = Debug|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Intel_SSA|Win32.ActiveCfg = Release|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Intel_SSA|Win32.Build.0 = Release|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Release|Win32.ActiveCfg = Release|Win32
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8}.Release|Win32.Build.0 = Release|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Debug|Win32.Build.0 = Debug|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Intel_SSA|Win32.ActiveCfg = Release|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Intel_SSA|Win32.Build.0 = Release|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Release|Win32.ActiveCfg = Release|Win32
+		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
