@@ -47,7 +47,7 @@
         call jovofd(n, c, x, y, u, v, z)
     
         !print the result
-        call printsolvedmatrix(n, c, x, y, z, output)    
+        call printsolvedmatrix(n, c, y, x, z, output)    
 
     end program jv
     

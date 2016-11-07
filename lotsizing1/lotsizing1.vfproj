@@ -27,6 +27,6 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\BranchBound.f90"/>
 		<File RelativePath=".\global.f90"/>
-		<File RelativePath=".\lapjv.f90"/>
+		<File RelativePath=".\jv.f90"/>
 		<File RelativePath=".\StackObject.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

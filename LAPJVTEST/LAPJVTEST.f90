@@ -15,7 +15,7 @@
 program LAPJVTEST
     use global
     use BranchBound
-    use lapjv
+    use jv
     implicit none
 
     ! Variables
