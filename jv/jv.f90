@@ -47,7 +47,7 @@
         call jovofd(n, c, x, y, u, v, z)
     
         !print the result
-        call printsolvedmatrix(n, c, x, y, z, output)    
+        call printsolvedmatrix(n, c, y, x, z, output)    
 
     end program jv
     
@@ -125,7 +125,10 @@
 40      format(A5,<dim>(A8))  
 50      format(A40,<dim>(I3))
     end subroutine printsolvedmatrix
-    
+
+!===========================================================
+!JV for dense matrix
+!===========================================================
 subroutine jovofd(N,C,X,Y,U,V,Z)
     implicit none
       INTEGER C(100,100),X(100),Y(100),U(100),V(100)
@@ -290,8 +293,11 @@ subroutine jovofd(N,C,X,Y,U,V,Z)
   100 CONTINUE
  1000 RETURN
 
-end subroutine jovofd 
+    end subroutine jovofd 
 
+!===========================================================
+!JV for sparse matrix
+!===========================================================
 SUBROUTINE JOVOSAP(N,CC,KK,FIRST,X,Y,U,V,H)
       INTEGER CC(2500),KK(2500),FIRST(101),X(100),Y(100),U(100),V(100)
       INTEGER H,CNT,L0,T,T0,TD,V0,VJ,DJ

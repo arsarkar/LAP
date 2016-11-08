@@ -54,10 +54,10 @@ module BranchBound
            !run the cost matrix through LAPJV
            call JOVOFD(dim, RC%m, x, y, u, v, z)
            !call JOVOSAP(dim,RC%m,KK,FIRST,X,Y,U,V,z)
-           call printsolvedmatrix(RC, x, y, z)           
+           call printsolvedmatrix(RC, y, x, z)           
            
            !identify every violations and classify them in completion and non completion time groups
-           call classifyViolations(RC, x, y) 
+           !call classifyViolations(RC, x, y) 
            
            !enumerate each violation and calculate bottleneck upper tolerance 
            
