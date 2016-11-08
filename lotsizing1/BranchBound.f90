@@ -5,6 +5,8 @@ module BranchBound
     !    integer :: j
     !end type matpos
     
+    !type violation to store one violation
+    !ct is the completion time violation and nct is the non completion time violations
     type violation
         integer ct(2)
         integer nct(2)
@@ -22,7 +24,7 @@ module BranchBound
     subroutine DFSBB(RC)
         use StackObject
         use global
-        use lapjv
+        use jv
         implicit none
         
         type(cmat) RC
@@ -78,7 +80,7 @@ module BranchBound
                   y(dim)    !row assigned to column
         
         integer :: i = 1, j = 1, k = 1, firstRow = 0, lastRow = 0
-        type(violation) v
+        type(violation) v   
         
         !for every job
         do i = 1, numjob
@@ -100,6 +102,11 @@ module BranchBound
             end do    
         end do    
         violationSize = k
+        
+        !print all violation
+        do i = 1, violationSize
+            
+        end do    
         
     end subroutine classifyViolations
     
@@ -141,7 +148,7 @@ module BranchBound
         !block the cell
         nc.m(matpos(1),matpos(2)) = huge(large)
         
-        call JOVOFDTEST(dim, nc.m, x, y, u, v, z)
+        !call JOVOFDTEST(dim, nc.m, x, y, u, v, z)
         
         solveJVByExcluding = z        
     
