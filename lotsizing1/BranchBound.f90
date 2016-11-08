@@ -1,10 +1,5 @@
 module BranchBound
     
-    !type matpos
-    !    integer :: i
-    !    integer :: j
-    !end type matpos
-    
     !type violation to store one violation
     !ct is the completion time violation and nct is the non completion time violations
     type violation
@@ -29,13 +24,15 @@ module BranchBound
         
         type(cmat) RC
         
-        integer :: x(dim), &                !col assigned to row
+        integer :: costmat(100,100), &
+                   x(dim), &                !col assigned to row
                    y(dim), &                !row assigned to column
                    u(dim), &                !Dual Row variable
                    v(dim), &                !Dual column variable
                    z, &    
                    KK(2500), &
                    FIRST(101)
+                    
         
         !declare stack to store nodes to be visited
         !size of stack is fixed to 10, can be increased later
@@ -53,15 +50,18 @@ module BranchBound
            RC = top(s)
            call pop(s)
            
+           costmat(1:dim,1:dim) = RC%m(1:dim,1:dim)
            !run the cost matrix through LAPJV
-           call JOVOFD(dim, RC%m, x, y, u, v, z)
+           call JOVOFD(dim, costmat, x, y, u, v, z)
            !call JOVOSAP(dim,RC%m,KK,FIRST,X,Y,U,V,z)
            call printsolvedmatrix(RC, y, x, z)           
            
            !identify every violations and classify them in completion and non completion time groups
-           !call classifyViolations(RC, x, y) 
+           call classifyViolations(RC, y, x) 
            
            !enumerate each violation and calculate bottleneck upper tolerance 
+           call calculateBottleneckTolerance(RC, z)
+           
            
             
         enddo
@@ -69,8 +69,10 @@ module BranchBound
     
     end subroutine DFSBB
     
+    !========================================================================================
     !this subroutine classify violations into completion and non-completions pairs 
     !this subroutine populates the vios array with completion and non-compeltion pairs
+    !========================================================================================
     subroutine classifyViolations(nc, x, y)
         use global    
         implicit none
@@ -79,8 +81,8 @@ module BranchBound
         integer:: x(dim), & !column assigned row 
                   y(dim)    !row assigned to column
         
-        integer :: i = 1, j = 1, k = 1, firstRow = 0, lastRow = 0
-        type(violation) v   
+        integer :: i = 1, j = 1, k = 0, firstRow = 0, lastRow = 0
+        type(violation) v 
         
         !for every job
         do i = 1, numjob
@@ -96,49 +98,60 @@ module BranchBound
                     v.ct(2) = x(lastRow)
                     v.nct(1) = j
                     v.nct(2) = x(j)
-                    vios(k) = v
                     k = k + 1
+                    !globally add the violation to violation collection
+                    vios(k) = v
                 end if
             end do    
         end do    
+        !globally assign violation size 
         violationSize = k
         
         !print all violation
-        do i = 1, violationSize
-            
-        end do    
+        write(output,20) violationSize
+        write(output,10) (vios(i).nct(1),vios(i).nct(2),vios(i).ct(1),vios(i).ct(2),i=1,violationSize) 
+        
+10      format(<violationSize>("(",I3,",",I3,")-(",I3,",",I3,");")) 
+20      format("total number violations found",I3)        
         
     end subroutine classifyViolations
     
+    !===================================================================================
     !this subroutine updates the bottleneck tolerance 
+    !===================================================================================
     subroutine calculateBottleneckTolerance(nc, upperBound)
         use global
         implicit none
-        integer :: upperBound, i = 1, j = 1 , k = 1, minCT = 0, minNCT = 0
+        integer :: upperBound, i = 1, z = 1 , k = 1, minCT = 0, minNCT = 0
         type(cmat) nc
         !loop though all violations
         do i = 1,  violationSize
            !calculate change if ct violation is excluded
-           j =  solveJVByExcluding(nc, vios(i).ct)
-           if (minCT < (j - upperBound)) then
-                minCT = j - upperBound
+           z =  solveJVByExcluding(nc, vios(i).ct)
+           if (minCT < (z - upperBound)) then
+                minCT = z - upperBound
            end if
            !calculate change if nct violation is excluded
-           j =  solveJVByExcluding(nc, vios(i).nct)
-           if (minNCT < (j - upperBound)) then
-                minNCT = j - upperBound
+           z =  solveJVByExcluding(nc, vios(i).nct)
+           if (minNCT < (z - upperBound)) then
+                minNCT = z - upperBound
            end if
         end do 
         return max(minCT, minNCT)
-    
+        
     end subroutine calculateBottleneckTolerance
     
+    !=============================================================
+    !Solve the cost matrix by blocking the matpos supplied
+    !=============================================================
     function solveJVByExcluding(nc, matpos)
         use global
+        use jv
         implicit none
         integer :: matpos(2), solveJVByExcluding        
         type(cmat) nc
-        integer :: large, &
+        integer :: COSTMAT(100,100), &
+                   large, &
                    x(dim), &                !col assigned to row
                    y(dim), &                !row assigned to column
                    u(dim), &                !Dual Row variable
@@ -148,7 +161,8 @@ module BranchBound
         !block the cell
         nc.m(matpos(1),matpos(2)) = huge(large)
         
-        !call JOVOFDTEST(dim, nc.m, x, y, u, v, z)
+        costmat(1:dim,1:dim) = NC%m(1:dim,1:dim)
+        call JOVOFD(dim, costmat, x, y, u, v, z)
         
         solveJVByExcluding = z        
     
