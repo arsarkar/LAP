@@ -11,7 +11,7 @@ MODULE StackObject
 
   TYPE StackT ! Data Type Stack, 
      PRIVATE  ! all members private and inaccessible to clients
-     TYPE(cmat), ALLOCATABLE, DIMENSION(:) :: Key
+     TYPE(solution), ALLOCATABLE, DIMENSION(:) :: Key
      INTEGER :: Last, ErrorNr, Size
      LOGICAL :: Error
   END TYPE StackT
@@ -82,7 +82,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
 
   SUBROUTINE add_to_stack(Node,Stack)
     IMPLICIT NONE
-    TYPE(cmat) :: Node
+    TYPE(solution) :: Node
     TYPE(StackT) :: Stack
 
     IF ( Stack%Last >= Stack%Size ) THEN
@@ -99,7 +99,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
 
   SUBROUTINE delete_from_stack(Stack,Node)
     IMPLICIT NONE
-    TYPE(cmat), OPTIONAL :: Node
+    TYPE(solution), OPTIONAL :: Node
     TYPE(StackT) :: Stack
 
     IF ( Stack%Last <= 0 ) THEN
@@ -117,7 +117,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
 
   FUNCTION select_from_stack(Stack) RESULT(Node)
     IMPLICIT NONE
-    TYPE(cmat) :: Node
+    TYPE(solution) :: Node
     TYPE(StackT) :: Stack
 
     IF ( Stack%Last >= 1 .AND. Stack%Last <= Stack%Size ) THEN
@@ -134,7 +134,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
 
   SUBROUTINE Stack2Array(Stack,Array)
     IMPLICIT NONE
-    TYPE(cmat), DIMENSION(1:) :: Array
+    TYPE(solution), DIMENSION(1:) :: Array
     TYPE(StackT) :: Stack
 
     IF ( SIZE(Array) >= Stack%Last ) THEN

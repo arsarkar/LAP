@@ -24,9 +24,42 @@
         !           z 
         !Integer :: c(100,100)
         !integer :: output = 5
+        integer :: maxdim = 100
     
     contains
     
+    subroutine solveLAP(costmat,r2c,c2r,cost)
+        use global
+        implicit none
+        
+        integer :: costmat(dim,dim),c2r(dim),r2c(dim)
+        integer, dimension(:,:), allocatable :: CM
+        integer, dimension(:), allocatable :: X,Y,U,V
+        integer :: cost, allocateStat
+        
+        !assign the maximum size for JOVOFD 
+        do while (dim > maxdim)
+            maxdim = maxdim + 100
+        end do
+        
+        !reallocate CM
+        allocate(CM(maxdim, maxdim), STAT = allocateStat)
+        allocate(X(maxdim), STAT = allocateStat)
+        allocate(Y(maxdim), STAT = allocateStat)
+        allocate(U(maxdim), STAT = allocateStat)
+        allocate(V(maxdim), STAT = allocateStat)
+        
+        !copy costmatrix
+        CM(1:dim,1:dim) = costmat(1:dim,1:dim)
+        
+        !solve the LAP
+        call jovofd(dim,CM,X,Y,U,V,cost)
+        
+        !copy back the solutions
+        r2c(1:dim) = Y(1:dim)
+        c2r(1:dim) = X(1:dim)        
+    
+    end subroutine solveLAP
         
     !****************************************************************************
     !
@@ -52,10 +85,10 @@
     !=================================================
     subroutine jovofd(N,C,X,Y,U,V,Z)
         implicit none
-          INTEGER C(100,100),X(100),Y(100),U(100),V(100)
+          INTEGER C(maxdim,maxdim),X(maxdim),Y(maxdim),U(maxdim),V(maxdim)
           INTEGER H,Z,L0,V0,VJ,DJ,UP,LOW
-          INTEGER LAB(100),D(100),FREE(100),COL(100)
-        INTEGER N,MIN,LAST,K,J1,J0,I,CNT,L,J,I0
+          INTEGER LAB(maxdim),D(maxdim),FREE(maxdim),COL(maxdim)
+          INTEGER N,MIN,LAST,K,J1,J0,I,CNT,L,J,I0
 
     ! INITIALIZATION
           DO 10 I=1,N

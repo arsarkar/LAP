@@ -11,8 +11,26 @@ module global
     end type jobstruct  
     
     type cmat
-        integer, allocatable, dimension(:,:) :: m
+        integer, allocatable, dimension(:,:) :: m       !2-D cost matrix
+        integer, allocatable, dimension(:) :: r2c       !row to column assignment k-th value is the column assigned to row k
+        integer, allocatable, dimension(:) :: c2r       !column to row assignment k-th value is the row assigned to column k
+        integer z                                       !cost of this solution
     end type cmat    
+    
+    !type violation to store one violation
+    !ct is the completion time violation and nct is the non completion time violations
+    type violation
+        integer ct(2)
+        integer nct(2)
+    end type violation
+    
+    !type solution
+    type solution
+        type(cmat) c            !Cost matrix
+        integer sr              !solved using strategy 1->including pivot 2-> excluding pivot
+        integer pivot(2)        !matrix cell acting as pivot
+        integer tolerance       !tolerance of this solution
+    end type solution
     
     !job table
     type (jobstruct), dimension(:), allocatable :: jobtable
@@ -28,6 +46,9 @@ module global
     
     !output file unit
     integer :: output = 5
+    
+    !vector to storing time slots
+    integer, allocatable, dimension(:) :: timeslots
     
     contains
     
@@ -63,30 +84,37 @@ module global
     
     end subroutine printcostmatrix
     
-    subroutine printsolvedmatrix(nc, x, y, z)
+    !========================================================================
+    !prints the cost matrix with row to column assignment marked by *
+    !if detail level is 1 then it prints everything
+    !if detail level is 2 then it prints only the cost
+    !========================================================================
+    subroutine printsolvedmatrix(nc, x, y, z, detail)
         implicit none
         integer:: i, j, k, z
         type(cmat) nc
-        integer :: x(dim), y(dim), val
+        integer :: x(dim), y(dim), val, detail
         character*1000 row
         character*7 :: cells(dim)
         !print the cost matrix
         write(output, '(A40,I5)') "Cost matrix solved with optimal value = ", z
-        write(output,10) 0, (i,i=1,dim)
-        write(output,40) "-----", ("--------",i=1,dim)
-        do i= 1, dim
-            k = 1
-            do j =1, dim
-                if (x(i)==j) then
-                    write(cells(k), 20) nc%m(i,j), '*'
-                else
-                    write(cells(k), 20) nc%m(i,j), ' '
-                end if
-                k = k + 1
-            end do    
-            write(output, 30) i, (cells(j), j=1,dim)   
-            !write(*,40) "-----", ("--------",j=1,dim
-        end do
+        if(detail == 1) then 
+            write(output,10) 0, (i,i=1,dim)
+            write(output,40) "-----", ("--------",i=1,dim)
+            do i= 1, dim
+                k = 1
+                do j =1, dim
+                    if (x(i)==j) then
+                        write(cells(k), 20) nc%m(i,j), '*'
+                    else
+                        write(cells(k), 20) nc%m(i,j), ' '
+                    end if
+                    k = k + 1
+                end do    
+                write(output, 30) i, (cells(j), j=1,dim)   
+                !write(*,40) "-----", ("--------",j=1,dim
+            end do
+        end if
 
 10      format(I5,<dim>(1X,"|",1X,I5))       
 20      format(1X,I5,A)        
@@ -192,7 +220,7 @@ module global
     !****************************************************************************
     subroutine assignmatrix()
         implicit none
-        integer :: n, i = 1, j = 1, p = 1, col = 1, MAX_INTEGER = 32767
+        integer :: n, i = 1, j = 1, k = 1, p = 1, col = 1, MAX_INTEGER = 32767
     
         !calculate the total dimensation fo cost matrix
         ! summation of all processing time as time is granulated as unit time
@@ -203,6 +231,9 @@ module global
         
         !allocate the cost matrix
         allocate(c%m(dim,dim))
+        allocate(c%r2c(dim))
+        allocate(c%c2r(dim))
+        allocate(timeslots(dim))
 
         i = 1
         do while (j <= numjob)
@@ -231,6 +262,9 @@ module global
                 p = p + 1   !increment p
                 i = i + 1   !increment i  
                 col = 1 !re-initialize col
+                !assign timeslots
+                timeslots(k) = j 
+                k = k + 1
             end do            
             j = j + 1 !increment j
             p = 1     ! re-initialize p            
@@ -238,6 +272,27 @@ module global
 
     end subroutine assignmatrix
 
-
+    !=====================================================================
+    ! returns false is the assignment is valid i.e no blocked cell is selected
+    !=====================================================================
+    function isAssignmentVaild(sol)
+        type(solution) sol
+        logical :: isAssignmentValid, isValid
+        
+        integer, dimension(dim) :: r2c
+        integer, dimension(dim,dim) :: cost
+        integer :: i
+        
+        cost(1:dim,1:dim) = sol%c%m(1:dim,1:dim)
+        r2c(1:dim) = sol%c%r2c(1:dim)
+        isValid = .TRUE.
+        !check if any of the blocked cell is selected 
+        do i = 1 , dim
+            if (cost(i,r2c(i)) > 9999) then
+                isValid = .FALSE.
+            end if
+        end do    
+        isAssignmentValid = isValid
+    end function
     
 end module    
