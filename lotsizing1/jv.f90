@@ -241,6 +241,7 @@
             IF (I0.NE.I) GOTO 80
        90 CONTINUE
           Z=0
+          !call printcostmatrix(C)
           DO 100 I=1,N
             U(I)=C(X(I),I)-V(X(I))
             Z=Z+C(X(I),I)
@@ -248,5 +249,27 @@
      1000 RETURN
 
     end subroutine jovofd 
+    
+    !========================================================================
+    !prints the cost matrix with fixed length matrix
+    !========================================================================
+    subroutine printcostmatrix(c)
+        use global
+        implicit none
+        integer:: i, j
+        INTEGER C(maxdim,maxdim)
+        write(output,'(A21)') "cost matrix printed from JV Algo... " 
+        !print the cost matrix
+        write(output,30) 0, (i,i=1,dim)
+        write(output,40) "-----", ("--------",i=1,dim)
+        do i= 1, dim
+            write(output, 30) i, (c(i,j), j=1,dim)   
+            !write(*,40) "-----", ("--------",j=1,dim)
+        end do
+        
+30      format(I5,<dim>(1X,"|",1X,I5)) 
+40      format(A5,<dim>(A8))    
+    
+    end subroutine printcostmatrix 
     
     end module

@@ -65,7 +65,10 @@ module global
 10      format(I5,2X,A1,2X,I3,2X,A1,2X,I3,2X,A1,2X,I3,2X,A1,2X,I3)
 20      format(A5,2X,A1,2X,A3,2X,A1,2X,A3,2X,A1,2X,A3,2X,A1,2X,A3)
     end subroutine printjobs
-    
+ 
+    !========================================================================
+    !prints the cost matrix 
+    !========================================================================
     subroutine printcostmatrix(nc)
         implicit none
         integer:: i, j
@@ -88,6 +91,7 @@ module global
     !prints the cost matrix with row to column assignment marked by *
     !if detail level is 1 then it prints everything
     !if detail level is 2 then it prints only the cost
+    !if detail level is 3 then it prints the asssignment 
     !========================================================================
     subroutine printsolvedmatrix(nc, x, y, z, detail)
         implicit none
@@ -98,6 +102,9 @@ module global
         character*7 :: cells(dim)
         !print the cost matrix
         write(output, '(A40,I5)') "Cost matrix solved with optimal value = ", z
+        if(detail == 3) then
+            write(output,50) (i,i=1,dim),(x(i),i=1,dim)
+        end if    
         if(detail == 1) then 
             write(output,10) 0, (i,i=1,dim)
             write(output,40) "-----", ("--------",i=1,dim)
@@ -115,11 +122,12 @@ module global
                 !write(*,40) "-----", ("--------",j=1,dim
             end do
         end if
-
+        
 10      format(I5,<dim>(1X,"|",1X,I5))       
 20      format(1X,I5,A)        
 30      format(I5,<dim>("|",A7)) 
-40      format(A5,<dim>(A8))    
+40      format(A5,<dim>(A8))   
+50      format("mapping =",<dim>(I3,"->"I3,"; "))        
     
     end subroutine printsolvedmatrix
     
@@ -250,11 +258,11 @@ module global
                             c%m(i,col) = 0
                         !for the last part assign the cost of delay calculated by (due date of job j - finishing time) * weight for job j     
                         else 
-                            if (col > jobtable(j).di) then 
-                                c%m(i,col) = (col - jobtable(j).di) * jobtable(j).wi 
-                            else 
-                                c%m(i,col) = 0
-                            end if
+                            !if (col > jobtable(j).di) then 
+                                c%m(i,col) =  jobtable(j).wi * col                                  !(col - jobtable(j).di) * jobtable(j).wi 
+                            !else 
+                            !    c%m(i,col) = 0
+                            !end if
                         end if   
                     end if
                     col = col + 1 !increment col
@@ -277,7 +285,7 @@ module global
     !=====================================================================
     function isAssignmentVaild(sol)
         type(solution) sol
-        logical :: isAssignmentValid, isValid
+        logical :: isAssignmentVaild, isValid
         
         integer, dimension(dim) :: r2c
         integer, dimension(dim,dim) :: cost
@@ -292,7 +300,64 @@ module global
                 isValid = .FALSE.
             end if
         end do    
-        isAssignmentValid = isValid
+        isAssignmentVaild = isValid
     end function
+    
+    !======================================================================================
+    !Implementation of WSRPT heuristics 
+    !Batsyn, Goldengorin, Pardalos, Sukhov 2013
+    !======================================================================================
+    subroutine wsrpt(optimumCost, schedule)
+        
+        implicit none
+        
+        integer:: optimumCost 
+        integer, dimension(dim):: schedule
+        integer, dimension(numJob):: rJobs
+        integer:: i,j,k
+        real :: bestRatio = 0.0, ratio, w, p
+        
+        !populate the remaining processing time to rJobs
+        do j=1,numJob
+            rJobs(j) = jobtable(j).pi
+        end do    
+        
+        do i=1,dim
+            !collect all assignable jobs 
+            do j = 1,numjob
+                if(jobtable(j).ri <= i .AND. rJobs(j) > 0) then
+                     w = jobtable(j).wi 
+                     p = rjobs(j)
+                     ratio = w/p
+                     if(ratio > bestRatio) then
+                         bestRatio = ratio
+                         k = j
+                     end if    
+                end if   
+            end do
+            !assign the job with best wi/rhoi ratio and decrease the remaining processing time
+            schedule(i) = k
+            rJobs(k) = rJobs(k) - 1
+            bestRatio = 0.0
+        end do 
+        
+        do j=1,numJob
+            rJobs(j) = jobtable(j).pi
+        end do 
+        
+        !calculate optimum cost 
+        do i=1,dim
+            rJobs(schedule(i)) = rJobs(schedule(i)) - 1
+            if (rJobs(schedule(i)) == 0) then
+                optimumCost = optimumCost + jobtable(schedule(i)).wi * i
+            end if    
+        end do 
+        
+        write(output, '(A40,I5)') "Optimum value of the schedule by WSRPT = ", optimumCost
+        write(output, 10) (schedule(i),i=1,dim) 
+        
+10      format("{",<dim>(I3," "),"}")        
+    
+    end subroutine
     
 end module    

@@ -4,7 +4,7 @@ module BranchBound
     
     type(violation) vios(100)
     
-    integer :: violationSize = 0, lowerBound = 0, upperBound = 99
+    integer :: violationSize = 0, lowerBound = 999, upperBound = 0
 
     !declare stack to store nodes to be visited
     !size of stack is fixed to 10, can be increased later
@@ -31,8 +31,9 @@ module BranchBound
                    z, &    
                    KK(2500), &
                    FIRST(101), &
-                   large
-        Logical isValid
+                   large, &
+                   schedule(dim)
+        Logical isValid, hasLowerBound, hasUpperBound
         
         !placeholder for solution
         type(solution) sol, soltmp
@@ -40,10 +41,12 @@ module BranchBound
         unvisited = NewStack(100)
         
         !initialize lower bound
-        lowerBound = -1*huge(large)
+        lowerBound = 1*huge(large)
+        hasLowerBound = .FALSE.
         
         !initialize the stack with the root element
         sol.c = RC
+        
         !solve the solution for the first time so that 
         !the stack always stores solved solutions
         costmat(1:dim,1:dim) = sol.c.m(1:dim,1:dim)
@@ -52,13 +55,22 @@ module BranchBound
         sol%c%r2c = y
         sol%c%c2r = x
         sol%c%z = z
-        !call JOVOSAP(dim,RC%m,KK,FIRST,X,Y,U,V,z)
-        call printsolvedmatrix(sol.c, y, x, z, 1) 
+
+        !call printsolvedmatrix(sol.c, y, x, z, 3) 
         
         call push(sol, unvisited)
         
+        write(output, 50)
+        
+        !apply heuristic to find upper bound
+        call wsrpt(upperBound, schedule)
+        
         !continue looping until there is no more nodes to visit
         do while(.not. isStackEmpty(unvisited))
+           
+           write(output, 50)
+           write(output, 10) 
+           write(output, 50)
            
            !get the first node from to be visited list
            !the stack will always return a sub problem
@@ -66,16 +78,33 @@ module BranchBound
            call pop(unvisited)
            soltmp = sol
            
+
+           
+           write(output, 30) "Current upper bound =", upperBound
+           write(output, 30) "Current lower bound =", lowerBound
+           call printsolvedmatrix(sol.c, y, x, z, 3) 
+           
            !prune the tree by checking the lower bound
            !if (sol%c%z < lowerBound) then
            !    cycle
            !end if    
            
-           !check if the solution is valid, i.e no blocked cell is selected
-           isValid = isAssignmentVaild(sol)
-           if(isValid) then
+           !check if the solution is valid, i.e no blocked cell is selected (this can be checked using upper bound, when blocked cell is selected it will surely cross upper bound)
+           !isValid = isAssignmentVaild(sol)
+           !if (.NOT. isValid) then
+           !    cycle
+           !end if  
+           if(sol%c%z > upperBound) then
                cycle
-           end if  
+           endif
+           !if(hasLowerBound) then
+           !    if(sol%c%z < lowerBound) then
+           !        cycle
+           !    end if
+           !end if
+                   
+           
+           write(output, 50)
            
            !check if the solution has sequence constrin maintained, if not then populate every violation in vios array by
            !identifying every violations and classifying them in completion and non completion time groups
@@ -83,13 +112,21 @@ module BranchBound
            !go to the next solution
            isValid = classifyViolations(sol)
            if(isValid) then
-               lowerBound = sol%c%z
-               solfinal = sol
+                !for a valid solution lower bound is recorded, Can a solution go lower than this? probably not being a feasible at the same time
+                if (sol%c%z < lowerBound) then
+                    lowerBound = sol%c%z
+                    hasLowerBound = .TRUE.
+                    solfinal = sol
+                end if
                cycle
            end if    
            
+           write(output, 50)
+           
            !enumerate each violation and calculate bottleneck upper tolerance 
            call calculateBottleneckTolerance(sol, 1)         
+           
+           write(output, 50)
            
            !the maximum solution found is the sub problem which is already solved by ~excluding~ the pivot
            solx = sol
@@ -99,13 +136,18 @@ module BranchBound
         
         enddo
         
+        write(output,50)
+        write(output,50)
+        write(output,50)
+        
         write(output, 40) solfinal%c%z
         call printsolvedmatrix(solfinal.c, solfinal%c%r2c, solfinal%c%c2r, solfinal%c%z, 1) 
 
-10      format("-------------------------------------------------------------------------------------------------------------")
+10      format("---------------------------------solving new subproblem-----------------------------------")
 20      format("Solving subproblem by excluding (",I3,",",I3,") with upper bound ")
-30      format("Currrent upper bound = ", I5)        
+30      format(A25, I5)        
 40      format("Optimum cost = ", I3, " optimum assignment ->")       
+50      format("------------------------------------------------------------------------------------------")        
     
     end subroutine DFSBB
     
@@ -129,8 +171,8 @@ module BranchBound
         y = sol%c%c2r
         lastRow = 0
         k = 0
-        write(output,30)
-        call printsolvedmatrix(sol%c, sol%c%r2c, sol%c%c2r, sol%C%z, 1)
+        !write(output,30)
+        !call printsolvedmatrix(sol%c, sol%c%r2c, sol%c%c2r, sol%C%z, 1)
         
         !for every job
         do i = 1, numjob
@@ -303,7 +345,7 @@ module BranchBound
         nc.c.m(matpos(1),matpos(2)) = large
         costmat(1:dim,1:dim) = NC.c.m(1:dim,1:dim)
         call JOVOFD(dim, costmat, x, y, u, v, z)
-        call printsolvedmatrix(NC.c, y, x, z, 1) 
+        call printsolvedmatrix(NC.c, y, x, z, 3) 
         NC%sr = 2
         NC%c%z = z
         NC%c%r2c = y
@@ -414,7 +456,7 @@ module BranchBound
         !call printcostmatrix(NC%c)
         call JOVOFD(dim, costmat, x, y, u, v, z)      
         nc%c%m(1:dim,1:dim) = costmat(1:dim,1:dim)
-        call printsolvedmatrix(NC.c, y, x, z, 1)  
+        call printsolvedmatrix(NC.c, y, x, z, 3)  
         nc%sr = 1
         nc%c%z = z
         nc%c%r2c = y
