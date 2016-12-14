@@ -1,367 +1,159 @@
-Reading file jobfile5.txt                                                                                                                                          
-jobs parsed from jobfile5.txt                                                                                                                                          
+Reading file jobfile3.txt                                                                                                                                          
+jobs parsed from jobfile3.txt                                                                                                                                          
 Index  |    p  |    d  |    w  |    r
  ------------------------------------
-    1  |    3  |    3  |    1  |    1
-    2  |    2  |    4  |    3  |    3
-    3  |    2  |    5  |    7  |    4
-    4  |    2  |    7  |    7  |    4
+    1  |    2  |    1  |    2  |    1
+    2  |    3  |    3  |    8  |    2
+    3  |    2  |    3  |   10  |    3
 cost matrix assigned 
 ------------------------------------------------------------------------------------------
-Optimum value of the schedule by WSRPT =  117
-{  1   1   2   3   3   4   4   2   1 }
+Optimum value of the schedule by WSRPT =  102
+{  1   2   3   3   2   2   1 }
 ------------------------------------------------------------------------------------------
 ---------------------------------solving new subproblem-----------------------------------
 ------------------------------------------------------------------------------------------
-    Current upper bound =  117
+    Current upper bound =  102
     Current lower bound =*****
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
 ------------------------------------------------------------------------------------------
-total number violations found  2
-(  6,  7)-(  7,  6);(  8,  8)-(  9,  5);
+total number violations found  1
+(  6,  6)-(  7,  4);
 ------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  7,  6)
-Solving cost matrix y excluding (  7,  6)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  5;   8->  6; 
-Solving with excluded NCT violation (  6,  7)
-Solving cost matrix y excluding (  6,  7)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  6;   7->  5; 
-Solving with excluded CT violation (  9,  5)
-Solving cost matrix y excluding (  9,  5)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  5;   8->  6; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  6;   7->  5; 
-Branching pivot found (  7,  6) with bottleneck tolerance     0
+Solving with excluded CT violation (  7,  4)
+Solving cost matrix y excluding (  7,  4)
+Cost matrix solved with optimal value =    96
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   6->  4;   3->  5; 
+Solving with excluded NCT violation (  6,  6)
+Solving cost matrix y excluding (  6,  6)
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   6->  5;   3->  4; 
+Branching pivot found (  7,  4) with bottleneck tolerance     2
 ------------------------------------------------------------------------------------------
-Solving cost matrix y including (  7,  6) with strategy-  1
-Cost matrix solved with optimal value =   107
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  7;   4->  6;   8->  5; 
+Solving cost matrix y including (  7,  4) with strategy-  1
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   6->  5;   3->  4; 
 ------------------------------------------------------------------------------------------
 ---------------------------------solving new subproblem-----------------------------------
 ------------------------------------------------------------------------------------------
-    Current upper bound =  117
+    Current upper bound =  102
     Current lower bound =*****
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
 ------------------------------------------------------------------------------------------
-total number violations found  2
-(  6,  7)-(  7,  5);(  8,  8)-(  9,  6);
+total number violations found  1
+(  4,  6)-(  5,  5);
+------------------------------------------------------------------------------------------
+Solving with excluded CT violation (  5,  5)
+Solving cost matrix y excluding (  5,  5)
+Cost matrix solved with optimal value =   100
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   2->  5;   6->  7;   3->  4; 
+Solving with excluded NCT violation (  4,  6)
+Solving cost matrix y excluding (  4,  6)
+Cost matrix solved with optimal value =   102
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   5->  6;   3->  4; 
+Branching pivot found (  5,  5) with bottleneck tolerance     6
+------------------------------------------------------------------------------------------
+Solving cost matrix y including (  5,  5) with strategy-  1
+Cost matrix solved with optimal value = 10052
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   6->  2;   4->  5;   3->  7; 
+------------------------------------------------------------------------------------------
+---------------------------------solving new subproblem-----------------------------------
+------------------------------------------------------------------------------------------
+    Current upper bound =  102
+    Current lower bound =*****
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
+------------------------------------------------------------------------------------------
+total number violations found  0
+(
+------------------------------------------------------------------------------------------
+---------------------------------solving new subproblem-----------------------------------
+------------------------------------------------------------------------------------------
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
+------------------------------------------------------------------------------------------
+---------------------------------solving new subproblem-----------------------------------
+------------------------------------------------------------------------------------------
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
+------------------------------------------------------------------------------------------
+total number violations found  1
+(  4,  6)-(  5,  4);
+------------------------------------------------------------------------------------------
+Solving with excluded CT violation (  5,  4)
+Solving cost matrix y excluding (  5,  4)
+Cost matrix solved with optimal value =   110
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   2->  4;   3->  7;   6->  5; 
+Solving with excluded NCT violation (  4,  6)
+Solving cost matrix y excluding (  4,  6)
+Cost matrix solved with optimal value =    96
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  4;   6->  5; 
+Branching pivot found (  5,  4) with bottleneck tolerance    14
+------------------------------------------------------------------------------------------
+Solving cost matrix y including (  5,  4) with strategy-  1
+Cost matrix solved with optimal value =    96
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  4;   6->  5; 
+------------------------------------------------------------------------------------------
+---------------------------------solving new subproblem-----------------------------------
+------------------------------------------------------------------------------------------
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
+------------------------------------------------------------------------------------------
+total number violations found  1
+(  6,  6)-(  7,  5);
 ------------------------------------------------------------------------------------------
 Solving with excluded CT violation (  7,  5)
 Solving cost matrix y excluding (  7,  5)
-Cost matrix solved with optimal value =   105
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   6->  7;   8->  5; 
-Solving with excluded NCT violation (  6,  7)
-Solving cost matrix y excluding (  6,  7)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  5;   7->  6; 
-Solving with excluded CT violation (  9,  6)
-Solving cost matrix y excluding (  9,  6)
-Cost matrix solved with optimal value =   105
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   6->  7;   8->  5; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  5;   7->  6; 
-Branching pivot found (  7,  5) with bottleneck tolerance     7
+Cost matrix solved with optimal value =   106
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  4;   5->  6; 
+Solving with excluded NCT violation (  6,  6)
+Solving cost matrix y excluding (  6,  6)
+Cost matrix solved with optimal value =   106
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  4;   5->  6; 
+Branching pivot found (  7,  5) with bottleneck tolerance    10
 ------------------------------------------------------------------------------------------
 Solving cost matrix y including (  7,  5) with strategy-  1
-Cost matrix solved with optimal value =   107
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  7;   4->  5;   8->  6; 
+Cost matrix solved with optimal value = 10062
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   6->  2;   3->  7;   4->  5; 
 ------------------------------------------------------------------------------------------
 ---------------------------------solving new subproblem-----------------------------------
 ------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =*****
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  5);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  5)
-Solving cost matrix y excluding (  9,  5)
-Cost matrix solved with optimal value =   112
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   5->  7;   8->  6; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   105
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  7;   6->  5; 
-Branching pivot found (  9,  5) with bottleneck tolerance     7
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  5) with strategy-  1
-Cost matrix solved with optimal value =   111
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  6;   8->  7;   4->  5; 
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
 ------------------------------------------------------------------------------------------
 ---------------------------------solving new subproblem-----------------------------------
 ------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =*****
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  6,  8)-(  7,  7);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  7,  7)
-Solving cost matrix y excluding (  7,  7)
-Cost matrix solved with optimal value =   118
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  6;   7->  8;   4->  5; 
-Solving with excluded NCT violation (  6,  8)
-Solving cost matrix y excluding (  6,  8)
-Cost matrix solved with optimal value =   114
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   6->  7;   4->  5; 
-Branching pivot found (  7,  7) with bottleneck tolerance     7
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  7,  7) with strategy-  1
-Cost matrix solved with optimal value =   114
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   6->  7;   4->  5; 
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
 ------------------------------------------------------------------------------------------
 ---------------------------------solving new subproblem-----------------------------------
 ------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =*****
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  0
-(
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  6);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  6)
-Solving cost matrix y excluding (  9,  6)
-Cost matrix solved with optimal value =   126
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   6->  8;   5->  7; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   112
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  7;   5->  6; 
-Branching pivot found (  9,  6) with bottleneck tolerance    14
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  6) with strategy-  1
-Cost matrix solved with optimal value =   112
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   8->  7;   5->  6; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  6,  8)-(  7,  7);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  7,  7)
-Solving cost matrix y excluding (  7,  7)
-Cost matrix solved with optimal value =   119
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  8;   5->  6; 
-Solving with excluded NCT violation (  6,  8)
-Solving cost matrix y excluding (  6,  8)
-Cost matrix solved with optimal value =   119
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  8;   5->  6; 
-Branching pivot found (  7,  7) with bottleneck tolerance     7
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  7,  7) with strategy-  1
-Cost matrix solved with optimal value =   121
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   5->  7;   4->  6; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  6);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  6)
-Solving cost matrix y excluding (  9,  6)
-Cost matrix solved with optimal value =   111
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  6;   4->  5;   8->  7; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   107
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   4->  5;   7->  6; 
-Branching pivot found (  9,  6) with bottleneck tolerance     4
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  6) with strategy-  1
-Cost matrix solved with optimal value = 10066
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  7;   4->  9;   5->  6; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  7);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  7)
-Solving cost matrix y excluding (  9,  7)
-Cost matrix solved with optimal value =   118
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  6;   4->  5;   7->  8; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   114
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   4->  5;   6->  7; 
-Branching pivot found (  9,  7) with bottleneck tolerance     7
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  7) with strategy-  1
-Cost matrix solved with optimal value =   114
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   4->  5;   6->  7; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  0
-(
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  5);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  5)
-Solving cost matrix y excluding (  9,  5)
-Cost matrix solved with optimal value =   112
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   5->  6;   8->  7; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   107
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   4->  6;   7->  5; 
-Branching pivot found (  9,  5) with bottleneck tolerance     5
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  5) with strategy-  1
-Cost matrix solved with optimal value = 10066
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  7;   5->  6;   4->  9; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
-total number violations found  1
-(  8,  8)-(  9,  7);
-------------------------------------------------------------------------------------------
-Solving with excluded CT violation (  9,  7)
-Solving cost matrix y excluding (  9,  7)
-Cost matrix solved with optimal value =   119
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   5->  6;   7->  8; 
-Solving with excluded NCT violation (  8,  8)
-Solving cost matrix y excluding (  8,  8)
-Cost matrix solved with optimal value =   119
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   5->  6;   7->  8; 
-Branching pivot found (  9,  7) with bottleneck tolerance     7
-------------------------------------------------------------------------------------------
-Solving cost matrix y including (  9,  7) with strategy-  1
-Cost matrix solved with optimal value =   121
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  3;   8->  9;   5->  6;   4->  7; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
-------------------------------------------------------------------------------------------
----------------------------------solving new subproblem-----------------------------------
-------------------------------------------------------------------------------------------
-    Current upper bound =  117
-    Current lower bound =  114
-Cost matrix solved with optimal value =    98
-mapping =  1->  2;   3->  4;   5->  6;   7->  8;   9->  1;   2->  9;   3->  4;   7->  6;   8->  5; 
+    Current upper bound =  102
+    Current lower bound =  100
+Cost matrix solved with optimal value =    94
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4; 
 ------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
-Optimum cost = 114 optimum assignment ->
-Cost matrix solved with optimal value =   114
-    0 |     1 |     2 |     3 |     4 |     5 |     6 |     7 |     8 |     9
------------------------------------------------------------------------------
-    1|     0*|     0 |     0 |     0 |     0 |     0 |     0 | 32767 | 32767 
-    2| 32767 |     0*|     0 |     0 |     0 |     0 |     0 |     0 | 32767 
-    3| 32767 | 32767 |     3*|     4 |     5 |     6 |     7 |     8 |     9 
-    4| 32767 | 32767 |     0 |     0 |     0 |     0 |     0 |     0*| 32767 
-    5| 32767 | 32767 | 32767 |    12 |    15 |    18 |    21 |    24 |    27*
-    6| 32767 | 32767 | 32767 |     0 |     0 |     0*| 10000 | 10000 | 10000 
-    7| 10000 | 10000 | 10000 | 10000 | 10000 | 10000 |    49*| 10000 | 10000 
-    8| 32767 | 32767 | 32767 |     0*| 10000 | 10000 | 10000 | 10000 | 10000 
-    9| 10000 | 10000 | 10000 | 10000 |    35*| 10000 | 10000 | 10000 | 10000 
+Optimum cost = 100 optimum assignment ->
+Cost matrix solved with optimal value =   100
+    0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
+-------------------------------------------------------------
+    1|     0*|     0 |     0 |     0 |     0 |     0 | 32767 
+    2| 32767 |     4*|     6 |     8 |    10 |    12 |    14 
+    3| 32767 |     0 |     0 |     0 |     0*| 32767 | 32767 
+    4| 32767 | 32767 |     0 |     0 |     0 |     0*| 32767 
+    5| 32767 | 32767 | 32767 |    32 | 10000 |    48 |    56*
+    6| 32767 | 32767 |     0*| 10000 | 10000 | 10000 | 10000 
+    7| 10000 | 10000 | 10000 |    40*| 10000 | 10000 | 10000 

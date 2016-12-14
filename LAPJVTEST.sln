@@ -10,6 +10,11 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "lotsizing1", "lotsizing1\lo
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "jv", "jv\jv.vfproj", "{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}"
 EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "experiment1", "experiment1\experiment1.vfproj", "{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FA5D6C6-3123-410C-9848-349B4DA23EB8} = {2FA5D6C6-3123-410C-9848-349B4DA23EB8}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -35,6 +40,12 @@ Global
 		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Intel_SSA|Win32.Build.0 = Release|Win32
 		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Release|Win32.ActiveCfg = Release|Win32
 		{B597F8AE-4699-4A29-8C0D-C1C0A5F73F94}.Release|Win32.Build.0 = Release|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Debug|Win32.Build.0 = Debug|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Intel_SSA|Win32.ActiveCfg = Release|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Intel_SSA|Win32.Build.0 = Release|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Release|Win32.ActiveCfg = Release|Win32
+		{0D4A8FA3-4D54-4DAD-A763-E18450892BA9}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

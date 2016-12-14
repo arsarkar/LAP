@@ -28,7 +28,6 @@ program LAPJVTEST
                v(100), &                !Dual column variable
                z 
     ! Body of LAPJVTEST
-    
     !!get the file name from program argument
     call getarg(1, fileName)
     fileName = trim(fileName)
