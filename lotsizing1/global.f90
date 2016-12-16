@@ -316,28 +316,38 @@ module global
         integer, dimension(numJob):: rJobs
         integer:: i,j,k
         real :: bestRatio = 0.0, ratio, w, p
+        logical:: canAssign = .FALSE.
         
         !populate the remaining processing time to rJobs
         do j=1,numJob
             rJobs(j) = jobtable(j).pi
         end do    
         
+        !initialize schedule
+        do j=1,dim
+            schedule(j) = 0
+        end do
+        
         do i=1,dim
             !collect all assignable jobs 
+            canAssign = .FALSE.
             do j = 1,numjob
                 if(jobtable(j).ri <= i .AND. rJobs(j) > 0) then
                      w = jobtable(j).wi 
                      p = rjobs(j)
                      ratio = w/p
                      if(ratio > bestRatio) then
+                         canAssign = .TRUE.
                          bestRatio = ratio
                          k = j
                      end if    
                 end if   
             end do
             !assign the job with best wi/rhoi ratio and decrease the remaining processing time
-            schedule(i) = k
-            rJobs(k) = rJobs(k) - 1
+            if (canAssign) then
+                schedule(i) = k
+                rJobs(k) = rJobs(k) - 1
+            end if
             bestRatio = 0.0
         end do 
         
@@ -347,10 +357,12 @@ module global
         
         !calculate optimum cost 
         do i=1,dim
-            rJobs(schedule(i)) = rJobs(schedule(i)) - 1
-            if (rJobs(schedule(i)) == 0) then
-                optimumCost = optimumCost + jobtable(schedule(i)).wi * i
-            end if    
+            if (schedule(i) > 0) then 
+                rJobs(schedule(i)) = rJobs(schedule(i)) - 1
+                if (rJobs(schedule(i)) == 0) then
+                    optimumCost = optimumCost + jobtable(schedule(i)).wi * i
+                end if  
+            end if  
         end do 
         
         write(output, '(A40,I5)') "Optimum value of the schedule by WSRPT = ", optimumCost

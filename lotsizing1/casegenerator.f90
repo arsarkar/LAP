@@ -60,7 +60,7 @@ module casegenerator
         use global
         implicit none
         
-        integer:: n, i, P = 0
+        integer:: n, i, P = 0, C = 0
         double precision :: r, t
         type (jobstruct) :: job
         
@@ -79,8 +79,9 @@ module casegenerator
     
         !assign Di, Ri and Wi
         do i = 1, n
+           C  = C + jobs(i)%pi
            jobs(i)%di = rand(ceiling(P*(1-t-r/2)), ceiling(P*(1-t+r/2)))
-           jobs(i)%ri = rand(0,P)
+           jobs(i)%ri = rand(0,C/2)
            jobs(i)%wi = rand(MIN_WI, MAX_WI)
         end do  
         

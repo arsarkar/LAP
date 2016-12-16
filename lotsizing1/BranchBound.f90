@@ -56,7 +56,8 @@ module BranchBound
         sol%c%c2r = x
         sol%c%z = z
 
-        !call printsolvedmatrix(sol.c, y, x, z, 3) 
+        call printsolvedmatrix(sol.c, y, x, z, 1) 
+        call printsolvedmatrix(sol.c, y, x, z, 3) 
         
         call push(sol, unvisited)
         

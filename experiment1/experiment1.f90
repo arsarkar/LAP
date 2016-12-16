@@ -22,8 +22,8 @@
     open(unit = output, file = "output.txt")
     
     !!configure the data generator
-    call configure(10,10,1,3)
-    numjob = 10 
+    call configure(5,10,1,3)
+    numjob = 5 
     
     !!generate the data
     call potts1982(numjob,r,t)
