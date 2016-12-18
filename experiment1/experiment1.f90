@@ -21,9 +21,9 @@
     !!open the file to write
     open(unit = output, file = "output.txt")
     
-    !!configure the data generator
-    call configure(5,10,1,3)
-    numjob = 5 
+    !!configure the data generator 
+    call configure(maxpi=2,maxwi=10,minwi=1,seed=3)
+    numjob = 15
     
     !!generate the data
     call potts1982(numjob,r,t)
@@ -43,18 +43,16 @@
     write(output,'(A21)') "cost matrix assigned " 
     !call printcostmatrix()
     
+    allocate(heuristicSchedule(dim))
+    
+    !apply heuristic to find upper bound
+    call wsrpt(upperBound, heuristicSchedule)
+    
     !test branch and bound
     call DFSBB(c)
     !call printcostmatrix(c)
-    
-    !run LAPJV
-    !call JOVOFDTEST(n, c%, x, y, u, v, z)
-    
-    !print result
-    !write(*, '(A15, I5)')  "Optimal value is ", z
-    !call printsolvedmatrix(c, x, y)
         
-    write(*,*) "Please press Enter to continue with next case......"
+    write(*,*) "Please press Enter to exit......"
     read(*,*)   
     
     end program experiment1

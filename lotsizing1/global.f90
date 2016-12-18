@@ -30,6 +30,7 @@ module global
         integer sr              !solved using strategy 1->including pivot 2-> excluding pivot
         integer pivot(2)        !matrix cell acting as pivot
         integer tolerance       !tolerance of this solution
+        integer depth           !depth of this sol in solution tree
     end type solution
     
     !job table
@@ -50,8 +51,52 @@ module global
     !vector to storing time slots
     integer, allocatable, dimension(:) :: timeslots
     
+    !heuristic schedule 
+    integer, allocatable, dimension(:) :: heuristicSchedule
+    
+    !statistics related variable (mostly used by branch and bound
+    integer:: maxDepth, minDepth, leafCount, validLeafCount, invalidLeafCount, prunedLeafCount 
+    real:: avgDepth
+    
+    !timer related variables
+    integer:: tickStart, tickEnd, tickMax, tickRate
+    
     contains
     
+    !========================================================================
+    !initialize ticker 
+    !========================================================================
+    subroutine initializeTimer()
+        implicit none
+        call SYSTEM_CLOCK(COUNT_RATE=tickRate, COUNT_MAX=tickMax)
+    end subroutine initializeTimer
+    
+    !========================================================================
+    !Start the timer
+    !========================================================================
+    subroutine startTimer()
+        implicit none
+        call initializeTimer()
+        call SYSTEM_CLOCK(COUNT=tickStart)
+    end subroutine startTimer
+    
+    !========================================================================
+    !stop the timer to get the elapsed time
+    !========================================================================
+    function stopTimer()
+        implicit none
+        real:: stopTimer, totalTicks
+        call SYSTEM_CLOCK(COUNT=tickEnd)
+        totalTicks = tickEnd - tickStart
+        if(tickEnd < tickStart) then
+            totalTicks = totalTicks + tickMax
+        end if    
+        stopTimer = REAL(totalTicks) / tickRate
+    end function stopTimer
+    
+    !========================================================================
+    !prints jobs in the jobtable 
+    !========================================================================
     subroutine printjobs()
         implicit none
         integer:: i
@@ -93,17 +138,17 @@ module global
     !if detail level is 2 then it prints only the cost
     !if detail level is 3 then it prints the asssignment 
     !========================================================================
-    subroutine printsolvedmatrix(nc, x, y, z, detail)
+    subroutine printsolvedmatrix(nc, detail)
         implicit none
-        integer:: i, j, k, z
+        integer:: i, j, k
         type(cmat) nc
-        integer :: x(dim), y(dim), val, detail
+        integer :: val, detail
         character*1000 row
         character*7 :: cells(dim)
         !print the cost matrix
-        write(output, '(A40,I5)') "Cost matrix solved with optimal value = ", z
+        write(output, '(A40,I5)') "Cost matrix solved with optimal value = ", nc%z
         if(detail == 3) then
-            write(output,50) (i,i=1,dim),(x(i),i=1,dim)
+            write(output,50) (i,i=1,dim),(nc%r2c(i),i=1,dim)
         end if    
         if(detail == 1) then 
             write(output,10) 0, (i,i=1,dim)
@@ -111,7 +156,7 @@ module global
             do i= 1, dim
                 k = 1
                 do j =1, dim
-                    if (x(i)==j) then
+                    if (nc%r2c(i)==j) then
                         write(cells(k), 20) nc%m(i,j), '*'
                     else
                         write(cells(k), 20) nc%m(i,j), ' '
@@ -229,11 +274,15 @@ module global
     subroutine assignmatrix()
         implicit none
         integer :: n, i = 1, j = 1, k = 1, p = 1, col = 1, MAX_INTEGER = 32767
+        integer :: minRi = 10000 
     
         !calculate the total dimensation fo cost matrix
         ! summation of all processing time as time is granulated as unit time
         do while (i <= numjob)
             dim = dim + jobtable(i).pi
+            if (jobtable(i).ri < minRi) then
+              minRi = jobtable(i).ri
+            end if 
             i = i + 1
         end do    
         
@@ -242,7 +291,17 @@ module global
         allocate(c%r2c(dim))
         allocate(c%c2r(dim))
         allocate(timeslots(dim))
-
+        
+        !data cleaning
+        !if ri>1 for every i then ri = ri-(rmin-1) because at least one job need to be available in the first slot
+        if (minRi > 1) then
+            i=1
+            do while (i <= numjob)
+                jobtable(i).ri = jobtable(i).ri - minRi + 1  
+                i = i + 1
+            end do
+        end if
+            
         i = 1
         do while (j <= numjob)
              !every job will contribute its processing time number of rows, each of which denotes one time unit
@@ -311,7 +370,7 @@ module global
         
         implicit none
         
-        integer:: optimumCost 
+        integer:: optimumCost
         integer, dimension(dim):: schedule
         integer, dimension(numJob):: rJobs
         integer:: i,j,k
@@ -356,6 +415,7 @@ module global
         end do 
         
         !calculate optimum cost 
+        optimumCost = 0
         do i=1,dim
             if (schedule(i) > 0) then 
                 rJobs(schedule(i)) = rJobs(schedule(i)) - 1

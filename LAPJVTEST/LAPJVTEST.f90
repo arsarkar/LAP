@@ -57,6 +57,11 @@ program LAPJVTEST
     write(*,'(A21)') "cost matrix assigned " 
     !call printcostmatrix()
     
+    allocate(heuristicSchedule(dim))
+    
+    !apply heuristic to find upper bound
+    call wsrpt(upperBound, heuristicSchedule)
+    
     !test branch and bound
     call DFSBB(c)
     !call printcostmatrix(c)

@@ -1,10 +1,10 @@
-module BranchBound
+module branchbound
     use global
     use StackObject
     
     type(violation) vios(100)
     
-    integer :: violationSize = 0, lowerBound = 999, upperBound = 0
+    integer :: violationSize = 0, upperBound = 9999, reportInterval = 100
 
     !declare stack to store nodes to be visited
     !size of stack is fixed to 10, can be increased later
@@ -32,39 +32,49 @@ module BranchBound
                    KK(2500), &
                    FIRST(101), &
                    large, &
-                   schedule(dim)
+                   solutionCount, &
+                   tempCount, &
+                   stackSize
         Logical isValid, hasLowerBound, hasUpperBound
+        REAL :: elapsedTime, timeRemaining
         
         !placeholder for solution
         type(solution) sol, soltmp
         type(solution) solx,soln, solfinal
         unvisited = NewStack(100)
         
-        !initialize lower bound
-        lowerBound = 1*huge(large)
-        hasLowerBound = .FALSE.
-        
-        !initialize the stack with the root element
+        !initialize the stack with the root element and other counters/flags 
         sol.c = RC
+        solutionCount = 0
+        sol.depth = 0
+        maxDepth = 0
+        minDepth = 9999
+        avgDepth = 0
+        leafCount = 0
+        validLeafCount = 0
+        invalidLeafCount = 0
+        prunedLeafCount = 0
+        tempCount = 0
         
         !solve the solution for the first time so that 
         !the stack always stores solved solutions
-        costmat(1:dim,1:dim) = sol.c.m(1:dim,1:dim)
+        !costmat(1:dim,1:dim) = sol.c.m(1:dim,1:dim)
         !run the cost matrix through LAPJV
-        call JOVOFD(dim, costmat, x, y, u, v, z)
-        sol%c%r2c = y
-        sol%c%c2r = x
+        !call JOVOFD(dim, costmat, x, y, u, v, z)
+        call solveLAP(sol.c.m, x, y, z)
+        sol%c%r2c = x
+        sol%c%c2r = y
         sol%c%z = z
 
-        call printsolvedmatrix(sol.c, y, x, z, 1) 
-        call printsolvedmatrix(sol.c, y, x, z, 3) 
+        call printsolvedmatrix(sol.c, 1) 
+        call printsolvedmatrix(sol.c, 3) 
         
         call push(sol, unvisited)
         
         write(output, 50)
         
-        !apply heuristic to find upper bound
-        call wsrpt(upperBound, schedule)
+        ! start the timer
+        call startTimer()
         
         !continue looping until there is no more nodes to visit
         do while(.not. isStackEmpty(unvisited))
@@ -77,33 +87,57 @@ module BranchBound
            !the stack will always return a sub problem
            sol = top(unvisited)
            call pop(unvisited)
-           soltmp = sol
+           soltmp = sol 
+           solutionCount = solutionCount + 1 
+           tempCount = tempCount + 1
            
-
-           
+           write(output, 30) "SolutionCount :: ", solutionCount
+           write(output, 30) "Depth of solution :: ", sol%depth
            write(output, 30) "Current upper bound =", upperBound
-           write(output, 30) "Current lower bound =", lowerBound
-           call printsolvedmatrix(sol.c, y, x, z, 3) 
+           call printsolvedmatrix(sol.c, 3)
            
-           !prune the tree by checking the lower bound
-           !if (sol%c%z < lowerBound) then
-           !    cycle
-           !end if    
+           if (tempCount > reportInterval) then
+               elapsedTime = stopTimer()
+               stackSize = getCount(unvisited)
+               timeRemaining = (stackSize * (elapsedTime / solutionCount)) / 60
+               tempCount = 0
+               write(*, '(A50)') "----------------------------------------------------------------"
+               write(*, 30) "SolutionCount :: ", solutionCount
+               write(*, 30) "Depth of solution :: ", sol%depth
+               write(*, 30) "Current upper bound =", upperBound
+               write(*, 30) "Solution cost =", sol%c%z
+               write(*, 30) "Estimated time remaining (min) :: ", stackSize
+           end if
+           
+           !calculate depth statistics
+           if(sol%depth > maxDepth) then
+               maxDepth = sol%depth
+           end if
+           
+           !prune the tree by checking the upperBound bound
+           if (sol%c%z > upperBound) then
+               write(output, 30) "Pruning the tree with solution = ", sol%c%z
+               leafCount = leafCount + 1
+               prunedLeafCount = prunedLeafCount + 1
+               avgDepth = avgDepth + sol%depth
+               if(sol%depth < minDepth) then
+                   minDepth = sol%depth
+               end if
+               cycle
+           end if    
            
            !check if the solution is valid, i.e no blocked cell is selected (this can be checked using upper bound, when blocked cell is selected it will surely cross upper bound)
-           !isValid = isAssignmentVaild(sol)
-           !if (.NOT. isValid) then
-           !    cycle
-           !end if  
-           if(sol%c%z > upperBound) then
+           isValid = isAssignmentVaild(sol)
+           if (.NOT. isValid) then
+               write(output, 30) "Pruning the tree with invalid solution at ", solutionCount
+               leafCount = leafCount + 1
+               invalidLeafCount = invalidLeafCount  + 1
+               avgDepth = avgDepth + sol%depth
+               if(sol%depth < minDepth) then
+                   minDepth = sol%depth
+               end if               
                cycle
-           endif
-           !if(hasLowerBound) then
-           !    if(sol%c%z < lowerBound) then
-           !        cycle
-           !    end if
-           !end if
-                   
+           end if  
            
            write(output, 50)
            
@@ -114,11 +148,17 @@ module BranchBound
            isValid = classifyViolations(sol)
            if(isValid) then
                 !for a valid solution lower bound is recorded, Can a solution go lower than this? probably not being a feasible at the same time
-                if (sol%c%z < lowerBound) then
-                    lowerBound = sol%c%z
-                    hasLowerBound = .TRUE.
+                if (sol%c%z <= upperBound) then
+                    upperBound = sol%c%z
                     solfinal = sol
                 end if
+                write(output, 30) "Solution is valid! new upperBound = ", upperBound
+                leafCount = leafCount + 1
+                validLeafCount = validLeafCount + 1
+                avgDepth = avgDepth + sol%depth
+               if(sol%depth < minDepth) then
+                   minDepth = sol%depth
+               end if
                cycle
            end if    
            
@@ -137,18 +177,34 @@ module BranchBound
         
         enddo
         
+        !stop the time
+        elapsedTime = stopTImer()
+        avgDepth = avgDepth / leafCount
+        
         write(output,50)
         write(output,50)
         write(output,50)
         
         write(output, 40) solfinal%c%z
-        call printsolvedmatrix(solfinal.c, solfinal%c%r2c, solfinal%c%c2r, solfinal%c%z, 1) 
+        call printsolvedmatrix(solfinal.c, 1)
+        write(output,50)
+        write(output,50)
+        write(output, 30) "Total nodes = ", solutionCount
+        write(output, 30) "Maximum depth of solution tree = ", maxDepth
+        write(output, 30) "Minimum depth of solution tree = ", minDepth
+        write(output, 60) "Average depth of solution tree = ", avgDepth
+        write(output, 30) "Total number of leaves in solution tree = ", leafCount
+        write(output, 30) "Total number of valid leaves in solution tree = ", validLeafCount
+        write(output, 30) "Total number of invalid leaves in solution tree = ", invalidLeafCount
+        write(output, 30) "Total number of pruned leaves in solution tree = ", prunedLeafCount
+        write(output, 60) "Total time taken = ", elapsedTime
 
 10      format("---------------------------------solving new subproblem-----------------------------------")
 20      format("Solving subproblem by excluding (",I3,",",I3,") with upper bound ")
-30      format(A25, I5)        
+30      format(A50, I10)        
 40      format("Optimum cost = ", I3, " optimum assignment ->")       
-50      format("------------------------------------------------------------------------------------------")        
+50      format("------------------------------------------------------------------------------------------")   
+60      format(A50, F5.2)          
     
     end subroutine DFSBB
     
@@ -200,7 +256,7 @@ module BranchBound
         
         !print all violation
         write(output,20) violationSize
-        write(output,10) (vios(i).nct(1),vios(i).nct(2),vios(i).ct(1),vios(i).ct(2),i=1,violationSize) 
+        !write(output,10) (vios(i).nct(1),vios(i).nct(2),vios(i).ct(1),vios(i).ct(2),i=1,violationSize) 
         
         if(violationSize .EQ. 0) then
             classifyViolations = .TRUE.
@@ -223,11 +279,11 @@ module BranchBound
         use global
         use StackObject
         implicit none
-        integer :: upperBound, i = 1, z = 1 , k = 1, l, minCT = 0, minNCT = 0, bottleNeck, strategy
-        integer, dimension(2):: minCTIndex, minNCTIndex, maxProbIndex 
+        integer :: upperBound, i = 1, z = 1 , k = 1, l, minCT = 0, minNCT = 0, maxCT = 0, bottleNeck, strategy
+        integer, dimension(2):: minCTIndex, maxCTIndex, minNCTIndex, maxProbIndex 
         type(solution) sol
         type(solution) sol0
-        type(solution) minCTSol, minNCTSol
+        type(solution) minCTSol, maxCTSol, minNCTSol
         type(solution) subprobs(100)
         
         sol0 = sol
@@ -238,7 +294,7 @@ module BranchBound
         do i = 1,  violationSize
            
            !calculate change if ct violation is excluded
-           write(output,20) vios(i).ct(1), vios(i).ct(2)
+           !write(output,20) vios(i).ct(1), vios(i).ct(2)
            sol = sol0                                                   !get the parent solution
            !generate new problem pivoting on ct vviolation
            call calculateTolerance(sol, vios(i).ct)
@@ -250,36 +306,44 @@ module BranchBound
                minCT = sol.tolerance
                minCTSol = sol
                minCTIndex = vios(i).ct
+               maxCT = sol.tolerance
+               maxCTSol = sol
+               maxCTIndex = vios(i).ct
            else    
                if (sol.tolerance < minCT) then
                     minCT = sol.tolerance
                     minCTSol = sol
                     minCTIndex = vios(i).ct
                end if
-           end if
-           
-           !calculate change if nct violation is excluded           
-           write(output,10) vios(i).nct(1), vios(i).nct(2)
-           sol = sol0  
-           
-           !generate new problem based on nct violation
-           call calculateTolerance(sol, vios(i).nct)
-           !put the new solution in the ascending order of tolerance
-           subprobs(k) =  sol 
-           k = k +1 
-            
-           !calculate the minimum nct tolerance
-           if (i==1) then
-               minNCT = sol.tolerance
-               minNCTSol = sol
-               minNCTIndex = vios(i).nct
-           else   
-               if (sol.tolerance < minNCT) then
-                    minNCT = sol.tolerance
-                    minNCTSol = sol
-                    minNCTIndex = vios(i).nct
+               if (sol.tolerance > maxCT) then
+                   maxCT = sol.tolerance
+                   maxCTSol = sol
+                   maxCTIndex = vios(i).ct
                end if
            end if
+           
+           !!calculate change if nct violation is excluded           
+           !write(output,10) vios(i).nct(1), vios(i).nct(2)
+           !sol = sol0  
+           !
+           !!generate new problem based on nct violation
+           !call calculateTolerance(sol, vios(i).nct)
+           !!put the new solution in the ascending order of tolerance
+           !subprobs(k) =  sol 
+           !k = k +1 
+           ! 
+           !!calculate the minimum nct tolerance
+           !if (i==1) then
+           !    minNCT = sol.tolerance
+           !    minNCTSol = sol
+           !    minNCTIndex = vios(i).nct
+           !else   
+           !    if (sol.tolerance < minNCT) then
+           !         minNCT = sol.tolerance
+           !         minNCTSol = sol
+           !         minNCTIndex = vios(i).nct
+           !    end if
+           !end if
             
         end do 
         
@@ -287,9 +351,9 @@ module BranchBound
         !set the sol with the min-min-max solution
         !set the pivot 
         !if (minCTSol.tolerance >= minNCTSol.tolerance) then
-            bottleNeck = minCT
-            sol = minCTSol
-            sol%pivot = minCTIndex
+            bottleNeck = maxCT
+            sol = maxCTSol
+            sol%pivot = maxCTIndex
         !else
         !    bottleNeck = minNCT
         !    sol = minNCTSol
@@ -344,13 +408,14 @@ module BranchBound
         !block the cell
         write(output, 10) matpos(1), matpos(2)
         nc.c.m(matpos(1),matpos(2)) = large
-        costmat(1:dim,1:dim) = NC.c.m(1:dim,1:dim)
-        call JOVOFD(dim, costmat, x, y, u, v, z)
-        call printsolvedmatrix(NC.c, y, x, z, 3) 
+        !costmat(1:dim,1:dim) = NC.c.m(1:dim,1:dim)
+        !call JOVOFD(dim, costmat, x, y, u, v, z)
+        call solveLAP(nc.c.m, x, y, z)
         NC%sr = 2
         NC%c%z = z
-        NC%c%r2c = y
-        NC%c%c2r = x
+        NC%c%r2c = x
+        NC%c%c2r = y
+        !call printsolvedmatrix(NC.c, 3) 
         
         solveJVByExcluding = z 
         
@@ -371,13 +436,17 @@ module BranchBound
         !solx%c%m(pivot(1),pivot(2)) = soln%c%m(pivot(1),pivot(2)) 
         cost = solveJVByIncluding(soln, solx%pivot, 1)
         
+        !increase the depth of solutions at branch
+        solx%depth = solx%depth + 1
+        soln%depth = soln%depth + 1
+        
         !should we first choose including or excluding? 
         !here whatever is minimum is chosen first
         if(solx.c.z >= soln.c.z) then
-            call push(solx, unvisited)
+            call push(solx, unvisited)  !will chosen later
             call push(soln, unvisited)
         else
-            call push(soln, unvisited)
+            call push(soln, unvisited)  !will chosen later
             call push(solx, unvisited)
         end if
     
@@ -408,7 +477,7 @@ module BranchBound
                    k, &
                    l
         
-        write(output, 10) matpos(1), matpos(2), strategy
+        !write(output, 10) matpos(1), matpos(2), strategy
         !call printcostmatrix(NC%c)
         nccopy(1:dim,1:dim) = NC%c%m(1:dim,1:dim)
         ass(1:dim) = timeslots(1:dim)
@@ -453,15 +522,16 @@ module BranchBound
             end do 
         end if    
         
-        costmat(1:dim,1:dim) = nccopy(1:dim,1:dim)
+        !costmat(1:dim,1:dim) = nccopy(1:dim,1:dim)
         !call printcostmatrix(NC%c)
-        call JOVOFD(dim, costmat, x, y, u, v, z)      
-        nc%c%m(1:dim,1:dim) = costmat(1:dim,1:dim)
-        call printsolvedmatrix(NC.c, y, x, z, 3)  
+        !call JOVOFD(dim, costmat, x, y, u, v, z)        
+        call solveLAP(nccopy, x, y, z)
+        nc%c%m(1:dim,1:dim) = nccopy(1:dim,1:dim)
         nc%sr = 1
         nc%c%z = z
-        nc%c%r2c = y
-        nc%c%c2r = x
+        nc%c%r2c = x
+        nc%c%c2r = y      
+        !call printsolvedmatrix(NC.c, 3)  
         
         solveJVByIncluding = z      
 

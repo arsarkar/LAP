@@ -12,7 +12,7 @@ MODULE StackObject
   TYPE StackT ! Data Type Stack, 
      PRIVATE  ! all members private and inaccessible to clients
      TYPE(solution), ALLOCATABLE, DIMENSION(:) :: Key
-     INTEGER :: Last, ErrorNr, Size
+     INTEGER :: Last, ErrorNr, Size, Count
      LOGICAL :: Error
   END TYPE StackT
 
@@ -29,6 +29,10 @@ MODULE StackObject
   INTERFACE top
      MODULE PROCEDURE select_from_stack
   END INTERFACE
+  
+  !INTERFACE scount
+  !   MODULE PROCEDURE getCount
+  !END INTERFACE
 
   ! These Operators are not available to clients
 
@@ -54,6 +58,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
           !Stack%Key = 0
           Stack%Size = StackSize
           Stack%Last = 0
+          Stack%Count = 0
           CALL SetErrorFlags(Stack,.FALSE.,0)
        ENDIF
     ENDIF
@@ -90,6 +95,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
     ELSE
        Stack%Last = Stack%Last + 1
        Stack%Key( Stack%Last ) = Node
+       Stack%Count = Stack%Count + 1
        CALL SetErrorFlags(Stack,.FALSE.,0)
     ENDIF
 
@@ -108,6 +114,7 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
     ELSE
        IF ( PRESENT(Node) ) Node = select_from_stack(Stack)
        Stack%Last = Stack%Last - 1
+       Stack%Count = Stack%Count - 1
        CALL SetErrorFlags(Stack,.FALSE.,0)
     ENDIF
 
@@ -213,6 +220,17 @@ CONTAINS  !---------------! Operators are implemented below !---------------!
     Stack%Last = 0
     
   END SUBROUTINE ClearStack
+  
+    ! (13) get the number of element in this stack
+
+  FUNCTION getCount(Stack) RESULT(stackSize)
+    IMPLICIT NONE
+    TYPE(StackT), intent(in) :: Stack
+    integer :: stackSize
+    
+    stackSize = Stack%Count
+
+  END FUNCTION getCount
 
   !------------ Sevice Routines -------------------!
 
