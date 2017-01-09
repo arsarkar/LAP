@@ -53,6 +53,7 @@ module global
     
     !heuristic schedule 
     integer, allocatable, dimension(:) :: heuristicSchedule
+    integer, allocatable, dimension(:) :: HSchedule
     
     !statistics related variable (mostly used by branch and bound
     integer:: maxDepth, minDepth, leafCount, validLeafCount, invalidLeafCount, prunedLeafCount 
@@ -258,9 +259,73 @@ module global
             read(inputline, *) job
             jobtable(i) = job
             i = i + 1
-        end do    
+        end do
 
     end subroutine readjobfile
+    
+    !****************************************************************************
+    !
+    !  SUBROUTINE: sort job table
+    !
+    !  PURPOSE:  sorts the jobs by release date and then weight 
+    !  
+    !****************************************************************************
+    !****************************************************************************
+    subroutine sortJobs()
+        implicit none
+        type (jobstruct) :: temp
+        INTEGER :: i, j, k, l, ri
+        LOGICAL :: swapped = .TRUE.
+ 
+        !sort by bubble sort comparing ready time
+        do while (swapped)
+            swapped = .FALSE.
+            DO i = 1, numjob-1
+              !swap if i-th ri is greater then i+1 th ri  
+              IF (jobtable(i).ri > jobtable(i+1).ri) THEN
+                temp = jobtable(i)
+                jobtable(i) = jobtable(i+1)
+                jobtable(i+1) = temp
+                swapped = .TRUE.    
+              END IF
+            END DO
+        END DO
+        
+        !now sort by weight
+        l = jobtable(1).ri
+        j = 1
+        do i = 1, numjob
+           if(jobtable(i).ri == l) then
+               cycle
+           else
+               if ((i-j) > 1) then
+                    !sort by bubble sort comparing weight
+                    swapped = .TRUE.
+                    DO while (swapped)
+                        swapped = .FALSE.
+                        DO k = j, i-2
+                              !swap if i-th ri is greater then i+1 th ri  
+                              IF (jobtable(k).wi > jobtable(k+1).wi) THEN
+                                    temp = jobtable(k)
+                                    jobtable(k) = jobtable(k+1)
+                                    jobtable(k+1) = temp
+                                    swapped = .TRUE.    
+                              END IF
+                        END DO
+                    END DO
+               end if
+                l = jobtable(i).ri
+                j = i            
+           end if    
+        end do    
+        
+        !reassign job index
+        do i=1,numjob
+            jobtable(i).jobi = i
+        end do    
+        
+    end subroutine sortJobs
+    
     
     !****************************************************************************
     !
@@ -373,7 +438,7 @@ module global
         integer:: optimumCost
         integer, dimension(dim):: schedule
         integer, dimension(numJob):: rJobs
-        integer:: i,j,k
+        integer:: i,j,k,l
         real :: bestRatio = 0.0, ratio, w, p
         logical:: canAssign = .FALSE.
         
@@ -423,10 +488,26 @@ module global
                     optimumCost = optimumCost + jobtable(schedule(i)).wi * i
                 end if  
             end if  
-        end do 
+        end do
+        
+        !asign HSchedule (schedule by part to match matrix formation technique)
+        allocate(HSchedule(dim))
+        l = 1
+        iloop: do i=1,numjob
+            kloop: do k = 1,jobtable(i).pi
+                jloop: do j=1,dim
+                    if (schedule(j)==i) then
+                        schedule(j) = 0
+                        HSchedule(l) = j
+                        l = l + 1
+                        EXIT jloop
+                    end if   
+                end do jloop   
+            end do kloop
+        end do iloop   
         
         write(output, '(A40,I5)') "Optimum value of the schedule by WSRPT = ", optimumCost
-        write(output, 10) (schedule(i),i=1,dim) 
+        write(output, 10) (HSchedule(i),i=1,dim) 
         
 10      format("{",<dim>(I3," "),"}")        
     

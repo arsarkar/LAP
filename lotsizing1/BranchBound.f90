@@ -56,6 +56,11 @@ module branchbound
         prunedLeafCount = 0
         tempCount = 0
         
+        !write the heuristic solution assigned to the cost matrix
+        sol%c%r2c = Hschedule
+        sol%c%z = upperBound
+        call printsolvedmatrix(sol.c, 1)
+        
         !solve the solution for the first time so that 
         !the stack always stores solved solutions
         !costmat(1:dim,1:dim) = sol.c.m(1:dim,1:dim)
@@ -66,8 +71,8 @@ module branchbound
         sol%c%c2r = y
         sol%c%z = z
 
-        call printsolvedmatrix(sol.c, 1) 
-        call printsolvedmatrix(sol.c, 3) 
+        !call printsolvedmatrix(sol.c, 1) 
+        !call printsolvedmatrix(sol.c, 3) 
         
         call push(sol, unvisited)
         
@@ -93,6 +98,11 @@ module branchbound
            
            write(output, 30) "SolutionCount :: ", solutionCount
            write(output, 30) "Depth of solution :: ", sol%depth
+           if(sol.sr == 1) then
+               write(output, 70) "including ", sol%pivot(1), sol%pivot(2) 
+           else if(sol.sr == 2) then
+               write(output, 70) "excluding ", sol%pivot(1), sol%pivot(2) 
+           end if    
            write(output, 30) "Current upper bound =", upperBound
            call printsolvedmatrix(sol.c, 3)
            
@@ -175,7 +185,7 @@ module branchbound
            soln = soltmp
            call generateSubProblem(solx,soln)
         
-        enddo
+        end do
         
         !stop the time
         elapsedTime = stopTImer()
@@ -199,12 +209,13 @@ module branchbound
         write(output, 30) "Total number of pruned leaves in solution tree = ", prunedLeafCount
         write(output, 60) "Total time taken = ", elapsedTime
 
-10      format("---------------------------------solving new subproblem-----------------------------------")
+10      format("----------------------solving new subproblem-------------------------")
 20      format("Solving subproblem by excluding (",I3,",",I3,") with upper bound ")
 30      format(A50, I10)        
 40      format("Optimum cost = ", I3, " optimum assignment ->")       
 50      format("------------------------------------------------------------------------------------------")   
-60      format(A50, F5.2)          
+60      format(A50, F5.2)    
+70      format(A50, "(",I3,",",I3,")")        
     
     end subroutine DFSBB
     
@@ -266,7 +277,8 @@ module branchbound
         
 10      format(<violationSize>("(",I3,",",I3,")-(",I3,",",I3,");")) 
 20      format("total number violations found",I3)        
-30      format("classifying violations for cost matrix....")        
+30      format("classifying violations for cost matrix....") 
+        
     end function classifyViolations
     
     !===================================================================================
@@ -379,10 +391,12 @@ module branchbound
         
         !lower bound is the solution 
         LB = sol%c%z
-        !calculate change if ct violation is excluded                                                  !get the parent solution
-        sol.pivot = violation                                       !set the pivot
+        !calculate change if ct violation is excluded                                                  
+        !get the parent solution
+        sol.pivot = violation                                       
+        !set the pivot
         !solve the new solution by excluding the pivot
-        z =  solveJVByExcluding(sol, violation) 
+        z =  solveJVByExcluding(sol, violation, 1) 
         t = z - LB                                           !calculate tolerance
         sol.tolerance = t                                    !set the tolerance to solution
         
@@ -391,11 +405,11 @@ module branchbound
     !=============================================================
     !Solve the cost matrix by blocking the matpos supplied
     !=============================================================
-    function solveJVByExcluding(nc, matpos)
+    function solveJVByExcluding(nc, matpos, strategy)
         use global
         use jv
         implicit none
-        integer :: matpos(2), solveJVByExcluding        
+        integer :: matpos(2), solveJVByExcluding, strategy, i, j, k, l       
         type(solution) nc
         integer :: COSTMAT(100,100), &
                    large = 10000, &
@@ -403,23 +417,33 @@ module branchbound
                    y(dim), &                !row assigned to column
                    u(dim), &                !Dual Row variable
                    v(dim), &                !Dual column variable
-                   z         
+                   z
         
+        write(output, 10) matpos(1), matpos(2), strategy
         !block the cell
-        write(output, 10) matpos(1), matpos(2)
-        nc.c.m(matpos(1),matpos(2)) = large
-        !costmat(1:dim,1:dim) = NC.c.m(1:dim,1:dim)
-        !call JOVOFD(dim, costmat, x, y, u, v, z)
+        if (strategy==1) then 
+            nc.c.m(matpos(1),matpos(2)) = large
+        else if (strategy==2) then
+            j = timeslots(matpos(1))
+            k = matpos(2) - jobtable(j).pi + 1
+            do i = matpos(1)-jobtable(j).pi+1 , matpos(1)
+                do l = k , dim
+                    nc.c.m(i,l) = large
+                end do
+                k = k + 1
+            end do    
+        end if
+        
         call solveLAP(nc.c.m, x, y, z)
         NC%sr = 2
         NC%c%z = z
         NC%c%r2c = x
         NC%c%c2r = y
-        !call printsolvedmatrix(NC.c, 3) 
+        call printsolvedmatrix(NC.c, 1) 
         
         solveJVByExcluding = z 
         
-10      format("Solving cost matrix y excluding (",I3,",",I3,")")        
+10      format("Solving cost matrix y excluding (",I3,",",I3,") with strategy-",I3 )        
     
     end function solveJVByExcluding    
         
@@ -432,9 +456,11 @@ module branchbound
         type(solution) solx,soln
         integer :: cost
         
-        !turn back the blocked pivot to normal
-        !solx%c%m(pivot(1),pivot(2)) = soln%c%m(pivot(1),pivot(2)) 
-        cost = solveJVByIncluding(soln, solx%pivot, 1)
+        !change the pivots to assignments as per the heuristic schedule
+        solx%pivot(2) = HSchedule(solx%pivot(1))
+        
+        cost = solveJVByIncluding(soln, solx%pivot, 4)
+        cost = solveJVByExcluding(solx, solx%pivot, 2)
         
         !increase the depth of solutions at branch
         solx%depth = solx%depth + 1
@@ -477,7 +503,7 @@ module branchbound
                    k, &
                    l
         
-        !write(output, 10) matpos(1), matpos(2), strategy
+        write(output, 10) matpos(1), matpos(2), strategy
         !call printcostmatrix(NC%c)
         nccopy(1:dim,1:dim) = NC%c%m(1:dim,1:dim)
         ass(1:dim) = timeslots(1:dim)
@@ -520,6 +546,19 @@ module branchbound
                     nccopy(i,matpos(2)) = large
                 end if
             end do 
+        else if(strategy==4) then
+            do i=1 , matpos(2)-1
+                nccopy(matpos(1),i) = large
+            end do    
+            j = ass(matpos(1))
+            i = matpos(1)-1
+            l=matpos(2)+1
+            do while(j == ass(i))
+                do k = l , dim
+                    nccopy(i,k) = large
+                end do
+                i = i - 1
+            end do
         end if    
         
         !costmat(1:dim,1:dim) = nccopy(1:dim,1:dim)
@@ -530,12 +569,13 @@ module branchbound
         nc%sr = 1
         nc%c%z = z
         nc%c%r2c = x
-        nc%c%c2r = y      
-        !call printsolvedmatrix(NC.c, 3)  
+        nc%c%c2r = y  
+        nc%pivot = matpos
+        call printsolvedmatrix(NC.c, 1)  
         
         solveJVByIncluding = z      
 
-10      format("Solving cost matrix y including (",I3,",",I3,") with strategy-",I3)         
+10      format("Solving cost matrix y including (",I3,",",I3,") with strategy ",I3)         
     
     end function solveJVByIncluding
     

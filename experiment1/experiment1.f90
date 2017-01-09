@@ -23,7 +23,7 @@
     
     !!configure the data generator 
     call configure(maxpi=2,maxwi=10,minwi=1,seed=3)
-    numjob = 15
+    numjob = 5
     
     !!generate the data
     call potts1982(numjob,r,t)
@@ -31,6 +31,9 @@
     !!get jobs
     allocate(jobtable(numjob))
     jobtable(1:numjob) = jobs(1:numjob)
+    
+    !sort jobs
+    call sortjobs()
     
     !print jobs
     write(output,'(A17,A150)') "jobs created for r=0.6, t=0.6"
