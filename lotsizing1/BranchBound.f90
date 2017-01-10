@@ -5,7 +5,9 @@ module branchbound
     type(violation) vios(100)
     
     integer :: violationSize = 0, upperBound = 9999, reportInterval = 100
-
+        
+    Logical, allocatable, dimension(:) :: inclist, exclist    
+    
     !declare stack to store nodes to be visited
     !size of stack is fixed to 10, can be increased later
     type(StackT) unvisited     
@@ -34,7 +36,8 @@ module branchbound
                    large, &
                    solutionCount, &
                    tempCount, &
-                   stackSize
+                   stackSize, &
+                   k
         Logical isValid, hasLowerBound, hasUpperBound
         REAL :: elapsedTime, timeRemaining
         
@@ -55,6 +58,12 @@ module branchbound
         invalidLeafCount = 0
         prunedLeafCount = 0
         tempCount = 0
+        allocate(inclist(dim))
+        allocate(exclist(dim))
+        do k = 1,dim
+            inclist(k) = .FALSE.
+            exclist(k) = .FALSE.
+        end do           
         
         !write the heuristic solution assigned to the cost matrix
         sol%c%r2c = Hschedule
@@ -134,7 +143,7 @@ module branchbound
                    minDepth = sol%depth
                end if
                cycle
-           end if    
+           end if   
            
            !check if the solution is valid, i.e no blocked cell is selected (this can be checked using upper bound, when blocked cell is selected it will surely cross upper bound)
            isValid = isAssignmentVaild(sol)
@@ -181,6 +190,7 @@ module branchbound
            
            !the maximum solution found is the sub problem which is already solved by ~excluding~ the pivot
            solx = soltmp
+           solx.pivot = sol.pivot
            !here we generate the solution by including the pivot
            soln = soltmp
            call generateSubProblem(solx,soln)
@@ -396,9 +406,14 @@ module branchbound
         sol.pivot = violation                                       
         !set the pivot
         !solve the new solution by excluding the pivot
-        z =  solveJVByExcluding(sol, violation, 1) 
-        t = z - LB                                           !calculate tolerance
-        sol.tolerance = t                                    !set the tolerance to solution
+        z =  solveJVByExcluding(sol, violation, 2) 
+        
+        if (isAssignmentVaild(sol)) then
+            t = z - LB                                           !calculate tolerance
+            sol.tolerance = t                                    !set the tolerance to solution   
+        else
+            sol.tolerance = 0 
+        end if   
         
     end subroutine calculateTolerance
     
@@ -468,13 +483,19 @@ module branchbound
         
         !should we first choose including or excluding? 
         !here whatever is minimum is chosen first
-        if(solx.c.z >= soln.c.z) then
-            call push(solx, unvisited)  !will chosen later
-            call push(soln, unvisited)
-        else
-            call push(soln, unvisited)  !will chosen later
-            call push(solx, unvisited)
-        end if
+        !if(solx.c.z >= soln.c.z) then            
+            if (exclist(solx%pivot(1)) == .FALSE.) then
+                call push(solx, unvisited)  !will chosen later]
+                exclist(solx%pivot(1)) = .TRUE.
+            end if           
+            if (inclist(solx%pivot(1)) == .FALSE.)  then
+                call push(soln, unvisited)
+                inclist(solx%pivot(1)) = .TRUE.
+            end if
+        !else
+        !    call push(soln, unvisited)  !will chosen later
+        !    call push(solx, unvisited)
+        !end if
     
     end subroutine generateSubProblem
     
@@ -556,8 +577,11 @@ module branchbound
             do while(j == ass(i))
                 do k = l , dim
                     nccopy(i,k) = large
-                end do
+                end do 
                 i = i - 1
+                if (i == 0) then
+                    exit
+                end if
             end do
         end if    
         

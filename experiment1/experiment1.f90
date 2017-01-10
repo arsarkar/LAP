@@ -23,7 +23,7 @@
     
     !!configure the data generator 
     call configure(maxpi=2,maxwi=10,minwi=1,seed=3)
-    numjob = 7
+    numjob = 20
     
     !!generate the data
     call potts1982(numjob,r,t)

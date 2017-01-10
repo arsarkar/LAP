@@ -30,20 +30,20 @@ mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   3->  5;   6->  4;
 ------------------------------------------------------------------------------------------
 total number violations found  1
 ------------------------------------------------------------------------------------------
-Solving cost matrix y excluding (  7,  4) with strategy-  1
-Cost matrix solved with optimal value =    96
+Solving cost matrix y excluding (  7,  4) with strategy-  2
+Cost matrix solved with optimal value = 20036
     0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
 -------------------------------------------------------------
     1|     0*|     0 |     0 |     0 |     0 |     0 | 32767 
-    2| 32767 |     4 |     6 |     8 |    10 |    12 |    14*
-    3| 32767 |     0*|     0 |     0 |     0 | 32767 | 32767 
-    4| 32767 | 32767 |     0 |     0 |     0 |     0*| 32767 
+    2| 32767 |     4*|     6 |     8 |    10 |    12 |    14 
+    3| 32767 |     0 |     0 |     0 |     0*| 32767 | 32767 
+    4| 32767 | 32767 |     0*|     0 |     0 |     0 | 32767 
     5| 32767 | 32767 | 32767 |    32*|    40 |    48 |    56 
-    6| 32767 | 32767 |     0*|     0 |     0 |     0 | 32767 
-    7| 32767 | 32767 | 32767 | 10000 |    50*|    60 |    70 
-Branching pivot found (  7,  4) with bottleneck tolerance     2
+    6| 32767 | 32767 | 10000 | 10000 | 10000 | 10000*| 10000 
+    7| 32767 | 32767 | 32767 | 10000 | 10000 | 10000 | 10000*
+Branching pivot found (  7,  4) with bottleneck tolerance     0
 ------------------------------------------------------------------------------------------
-Solving cost matrix y including (  7,  4) with strategy-  4
+Solving cost matrix y including (  7,  4) with strategy   4
 Cost matrix solved with optimal value =    94
     0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
 -------------------------------------------------------------
@@ -77,20 +77,20 @@ mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   6->  5;   3->  4;
 ------------------------------------------------------------------------------------------
 total number violations found  1
 ------------------------------------------------------------------------------------------
-Solving cost matrix y excluding (  5,  5) with strategy-  1
-Cost matrix solved with optimal value =    96
+Solving cost matrix y excluding (  5,  5) with strategy-  2
+Cost matrix solved with optimal value = 10062
     0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
 -------------------------------------------------------------
     1|     0*|     0 |     0 |     0 |     0 |     0 | 32767 
-    2| 32767 |     4 |     6 |     8 |    10 |    12 |    14*
-    3| 32767 |     0*|     0 |     0 |     0 | 32767 | 32767 
-    4| 32767 | 32767 |     0 |     0 |     0 |     0*| 32767 
-    5| 32767 | 32767 | 32767 |    32*| 10000 |    48 |    56 
-    6| 32767 | 32767 |     0*|     0 | 10000 | 10000 | 10000 
+    2| 32767 |     4 |     6 |     8 |    10 |    12*|    14 
+    3| 32767 |     0*| 10000 | 10000 | 10000 | 10000 | 10000 
+    4| 32767 | 32767 |     0*| 10000 | 10000 | 10000 | 10000 
+    5| 32767 | 32767 | 32767 |    32 | 10000 | 10000 | 10000*
+    6| 32767 | 32767 |     0 |     0*| 10000 | 10000 | 10000 
     7| 10000 | 10000 | 10000 |    40 |    50*|    60 |    70 
-Branching pivot found (  5,  5) with bottleneck tolerance     2
+Branching pivot found (  5,  5) with bottleneck tolerance     0
 ------------------------------------------------------------------------------------------
-Solving cost matrix y including (  5,  6) with strategy-  4
+Solving cost matrix y including (  5,  6) with strategy   4
 Cost matrix solved with optimal value =   100
     0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
 -------------------------------------------------------------
@@ -102,16 +102,16 @@ Cost matrix solved with optimal value =   100
     6| 32767 | 32767 |     0*|     0 | 10000 | 10000 | 10000 
     7| 10000 | 10000 | 10000 |    40*|    50 |    60 |    70 
 Solving cost matrix y excluding (  5,  6) with strategy-  2
-Cost matrix solved with optimal value = 10062
+Cost matrix solved with optimal value =   114
     0 |     1 |     2 |     3 |     4 |     5 |     6 |     7
 -------------------------------------------------------------
     1|     0*|     0 |     0 |     0 |     0 |     0 | 32767 
-    2| 32767 |     4 |     6 |     8 |    10 |    12*|    14 
+    2| 32767 |     4 |     6 |     8 |    10 |    12 |    14*
     3| 32767 |     0*|     0 | 10000 | 10000 | 10000 | 10000 
     4| 32767 | 32767 |     0 |     0*| 10000 | 10000 | 10000 
-    5| 32767 | 32767 | 32767 |    32 | 10000 | 10000 | 10000*
+    5| 32767 | 32767 | 32767 |    32 |    40*| 10000 | 10000 
     6| 32767 | 32767 |     0*|     0 | 10000 | 10000 | 10000 
-    7| 10000 | 10000 | 10000 |    40 |    50*|    60 |    70 
+    7| 10000 | 10000 | 10000 |    40 |    50 |    60*|    70 
 ------------------------------------------------------------------------------------------
 ----------------------solving new subproblem-------------------------
 ------------------------------------------------------------------------------------------
@@ -131,9 +131,9 @@ total number violations found  0
                              Depth of solution ::          2
                                         excluding (  5,  6)
                              Current upper bound =       100
-Cost matrix solved with optimal value = 10062
-mapping =  1->  2;   3->  4;   5->  6;   7->  1;   6->  2;   4->  7;   3->  5; 
-                 Pruning the tree with solution =      10062
+Cost matrix solved with optimal value =   114
+mapping =  1->  2;   3->  4;   5->  6;   7->  1;   7->  2;   4->  5;   3->  6; 
+                 Pruning the tree with solution =        114
 ------------------------------------------------------------------------------------------
 ----------------------solving new subproblem-------------------------
 ------------------------------------------------------------------------------------------
@@ -168,4 +168,4 @@ Cost matrix solved with optimal value =   100
   Total number of valid leaves in solution tree =          1
 Total number of invalid leaves in solution tree =          0
  Total number of pruned leaves in solution tree =          2
-                               Total time taken = 32.67
+                               Total time taken =  0.01
