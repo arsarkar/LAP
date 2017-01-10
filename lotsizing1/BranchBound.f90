@@ -180,7 +180,7 @@ module branchbound
            write(output, 50)
            
            !the maximum solution found is the sub problem which is already solved by ~excluding~ the pivot
-           solx = sol
+           solx = soltmp
            !here we generate the solution by including the pivot
            soln = soltmp
            call generateSubProblem(solx,soln)
