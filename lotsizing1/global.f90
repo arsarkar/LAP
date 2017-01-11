@@ -31,6 +31,8 @@ module global
         integer pivot(2)        !matrix cell acting as pivot
         integer tolerance       !tolerance of this solution
         integer depth           !depth of this sol in solution tree
+        logical, allocatable, dimension(:,:) :: incmap      !stores the map of which cells are included
+        logical, allocatable, dimension(:,:) :: exlmap      !stores the map of which cells are excluded
     end type solution
     
     !job table

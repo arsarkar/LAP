@@ -6,7 +6,7 @@ module branchbound
     
     integer :: violationSize = 0, upperBound = 9999, reportInterval = 100
         
-    Logical, allocatable, dimension(:) :: inclist, exclist    
+    !Logical, allocatable, dimension(:) :: inclist, exclist    
     
     !declare stack to store nodes to be visited
     !size of stack is fixed to 10, can be increased later
@@ -37,7 +37,8 @@ module branchbound
                    solutionCount, &
                    tempCount, &
                    stackSize, &
-                   k
+                   k, &
+                   l
         Logical isValid, hasLowerBound, hasUpperBound
         REAL :: elapsedTime, timeRemaining
         
@@ -58,12 +59,14 @@ module branchbound
         invalidLeafCount = 0
         prunedLeafCount = 0
         tempCount = 0
-        allocate(inclist(dim))
-        allocate(exclist(dim))
-        do k = 1,dim
-            inclist(k) = .FALSE.
-            exclist(k) = .FALSE.
-        end do           
+        allocate(sol.incmap(dim,dim))
+        allocate(sol.exlmap(dim,dim))
+        do k= 1,dim
+            do l=1,dim
+            sol.incmap(k,l) = .FALSE.
+            sol.exlmap(k,l) = .FALSE.
+            end do
+        end do    
         
         !write the heuristic solution assigned to the cost matrix
         sol%c%r2c = Hschedule
@@ -113,7 +116,7 @@ module branchbound
                write(output, 70) "excluding ", sol%pivot(1), sol%pivot(2) 
            end if    
            write(output, 30) "Current upper bound =", upperBound
-           call printsolvedmatrix(sol.c, 3)
+           call printsolvedmatrix(sol.c, 1)
            
            if (tempCount > reportInterval) then
                elapsedTime = stopTimer()
@@ -302,45 +305,66 @@ module branchbound
         use StackObject
         implicit none
         integer :: upperBound, i = 1, z = 1 , k = 1, l, minCT = 0, minNCT = 0, maxCT = 0, bottleNeck, strategy
-        integer, dimension(2):: minCTIndex, maxCTIndex, minNCTIndex, maxProbIndex 
+        integer, dimension(2):: minCTIndex, maxCTIndex, minNCTIndex, maxProbIndex
+        logical, dimension(dim,dim) :: incMap, exlMap
         type(solution) sol
         type(solution) sol0
-        type(solution) minCTSol, maxCTSol, minNCTSol
+        type(solution) minCTSol, maxCTSol, minNCTSol, temp
         type(solution) subprobs(100)
+        type(violation) tempVios(100)
+        type(violation) lastvio
+        logical cont, swapped
         
         sol0 = sol
         minCT = 0
         minNCT = 0
         k=1
+        
+        !delete duplicate CT violations 
+        !(don't perform this if NCT violations are evaluated and revert back the use of tempvios)
+        tempVios = vios
+        k = 0
+        lastvio.ct(1) = 0
+        lastvio.ct(2) = 0
+        do i = 1, violationSize
+           if ( vios(i).ct(1) /= lastvio.ct(1) .OR. vios(i).ct(2) /= lastvio.ct(2)) then
+               k = k + 1
+               tempVios(k) = vios(i)               
+           end if
+           lastvio = vios(i)
+        end do 
+        violationSize = k
+        
         !loop though all violations
+        k = 0
         do i = 1,  violationSize
            
            !calculate change if ct violation is excluded
            !write(output,20) vios(i).ct(1), vios(i).ct(2)
            sol = sol0                                                   !get the parent solution
            !generate new problem pivoting on ct vviolation
-           call calculateTolerance(sol, vios(i).ct)
-           subprobs(k) = sol
+           call calculateTolerance(sol, tempVios(i).ct)
            k = k + 1
+           subprobs(k) = sol
             
            !calculate the minimum ct tolerance 
            if (i==1) then
                minCT = sol.tolerance
                minCTSol = sol
-               minCTIndex = vios(i).ct
+               minCTIndex = tempVios(i).ct
                maxCT = sol.tolerance
                maxCTSol = sol
-               maxCTIndex = vios(i).ct
+               maxCTIndex = tempVios(i).ct
            else    
                if (sol.tolerance < minCT) then
                     minCT = sol.tolerance
                     minCTSol = sol
-                    minCTIndex = vios(i).ct
+                    minCTIndex = tempVios(i).ct
                end if
                if (sol.tolerance > maxCT) then
                    maxCT = sol.tolerance
                    maxCTSol = sol
-                   maxCTIndex = vios(i).ct
+                   maxCTIndex = tempVios(i).ct
                end if
            end if
            
@@ -367,9 +391,9 @@ module branchbound
            !    end if
            !end if
             
-        end do 
+        end do         
         
-        !calculate bottle nexk tolerance 
+        !calculate bottle neck tolerance 
         !set the sol with the min-min-max solution
         !set the pivot 
         !if (minCTSol.tolerance >= minNCTSol.tolerance) then
@@ -381,6 +405,37 @@ module branchbound
         !    sol = minNCTSol
         !    sol%pivot = minNCTIndex
         !end if
+        
+        !this block selects the CT violation producing maximum bottleneck tolerance
+        ! WHICH DIDN'T GET EXCLUDED BEFORE (remove this block to stop overrriding bottlenexk and selected pivot)
+        !sort subprob list in descending order by bubble sort comparing tolerance
+        swapped = .TRUE.
+        do while (swapped)
+            swapped = .FALSE.
+            DO i = 1, k-1
+              !swap if i-th tolerance is less then i+1 th tolerance  
+              IF (subprobs(i).tolerance < subprobs(i+1).tolerance) THEN
+                temp = subprobs(i)
+                subprobs(i) = subprobs(i+1)
+                subprobs(i+1) = temp
+                swapped = .TRUE.    
+              END IF
+            END DO
+        END DO
+        iloop: do i = 1, k
+            bottleNeck = subprobs(i).tolerance
+            sol = subprobs(i)
+            sol.pivot = subprobs(i).pivot
+            cont = .FALSE.
+            lloop: do l = 1, dim
+                if(sol0.exlmap(subprobs(i).pivot(1),l)) then
+                    cont = .TRUE.
+                end if    
+            end do lloop
+            if (.NOT. cont) then
+                exit iloop
+            end if    
+        end do iloop   
         
         write(output,30) sol%pivot(1), sol%pivot(2), bottleNeck
         
@@ -406,7 +461,7 @@ module branchbound
         sol.pivot = violation                                       
         !set the pivot
         !solve the new solution by excluding the pivot
-        z =  solveJVByExcluding(sol, violation, 2) 
+        z =  solveJVByExcluding(sol, violation, 3) 
         
         if (isAssignmentVaild(sol)) then
             t = z - LB                                           !calculate tolerance
@@ -424,7 +479,7 @@ module branchbound
         use global
         use jv
         implicit none
-        integer :: matpos(2), solveJVByExcluding, strategy, i, j, k, l       
+        integer :: matpos(2), solveJVByExcluding, strategy, i, j, k, l, p       
         type(solution) nc
         integer :: COSTMAT(100,100), &
                    large = 10000, &
@@ -440,13 +495,25 @@ module branchbound
             nc.c.m(matpos(1),matpos(2)) = large
         else if (strategy==2) then
             j = timeslots(matpos(1))
-            k = matpos(2) - jobtable(j).pi + 1
-            do i = matpos(1)-jobtable(j).pi+1 , matpos(1)
+            p = jobtable(j).pi
+            k = matpos(2) - p + 1
+            do i = matpos(1) - p + 1 , matpos(1)
                 do l = k , dim
-                    nc.c.m(i,l) = large
+                    nc.c.m(i,max(l,1)) = large
                 end do
                 k = k + 1
-            end do    
+            end do 
+        else if (strategy == 3) then
+            nc.c.m(matpos(1),matpos(2)) = large
+            j = timeslots(matpos(1))
+            p = jobtable(j).pi
+            k = matpos(2) + 3 - p
+            do i = matpos(1) - p + 1 , matpos(1) - 1
+                do l = k , dim
+                    nc.c.m(i,max(l,1)) = large
+                end do
+                k = k + 1
+            end do
         end if
         
         call solveLAP(nc.c.m, x, y, z)
@@ -475,27 +542,37 @@ module branchbound
         solx%pivot(2) = HSchedule(solx%pivot(1))
         
         cost = solveJVByIncluding(soln, solx%pivot, 4)
-        cost = solveJVByExcluding(solx, solx%pivot, 2)
+        cost = solveJVByExcluding(solx, solx%pivot, 3)
         
         !increase the depth of solutions at branch
         solx%depth = solx%depth + 1
         soln%depth = soln%depth + 1
         
+        !mark the incmap and exlmap of subproblems
+        !solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.
+        !soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
+        
         !should we first choose including or excluding? 
         !here whatever is minimum is chosen first
-        !if(solx.c.z >= soln.c.z) then            
-            if (exclist(solx%pivot(1)) == .FALSE.) then
-                call push(solx, unvisited)  !will chosen later]
-                exclist(solx%pivot(1)) = .TRUE.
-            end if           
-            if (inclist(solx%pivot(1)) == .FALSE.)  then
-                call push(soln, unvisited)
-                inclist(solx%pivot(1)) = .TRUE.
+        if(solx.c.z >= soln.c.z) then
+            if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
+                solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
+                call push(solx, unvisited)
             end if
-        !else
-        !    call push(soln, unvisited)  !will chosen later
-        !    call push(solx, unvisited)
-        !end if
+            if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
+                soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
+                call push(soln, unvisited)
+            end if
+        else
+            if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
+                soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
+                call push(soln, unvisited)
+            end if
+            if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
+                solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
+                call push(solx, unvisited)
+            end if
+        end if
     
     end subroutine generateSubProblem
     
@@ -576,9 +653,10 @@ module branchbound
             l=matpos(2)+1
             do while(j == ass(i))
                 do k = l , dim
-                    nccopy(i,k) = large
+                    nccopy(i,max(k,1)) = large
                 end do 
                 i = i - 1
+                l = l - 1
                 if (i == 0) then
                     exit
                 end if
