@@ -335,107 +335,90 @@ module branchbound
         end do 
         violationSize = k
         
+        do i = 1, violationSize
+            if (i == 1) then
+                maxCT = sol%c%m(tempVios(i).ct(1), tempVios(i).ct(2))
+                maxCTSol = sol
+                maxCTIndex = tempVios(i).ct
+            else
+                if (maxCT < sol%c%m(tempVios(i).ct(1), tempVios(i).ct(2))) then
+                    maxCT = sol%c%m(tempVios(i).ct(1), tempVios(i).ct(2))
+                    maxCTSol = sol
+                    maxCTIndex = tempVios(i).ct
+                end if    
+            end if    
+        end do    
+        bottleNeck = maxCT
+        sol = maxCTSol
+        sol%pivot = maxCTIndex
+        
         !loop though all violations
-        k = 0
-        do i = 1,  violationSize
-           
-           !calculate change if ct violation is excluded
-           !write(output,20) vios(i).ct(1), vios(i).ct(2)
-           sol = sol0                                                   !get the parent solution
-           !generate new problem pivoting on ct vviolation
-           call calculateTolerance(sol, tempVios(i).ct)
-           k = k + 1
-           subprobs(k) = sol
-            
-           !calculate the minimum ct tolerance 
-           if (i==1) then
-               minCT = sol.tolerance
-               minCTSol = sol
-               minCTIndex = tempVios(i).ct
-               maxCT = sol.tolerance
-               maxCTSol = sol
-               maxCTIndex = tempVios(i).ct
-           else    
-               if (sol.tolerance < minCT) then
-                    minCT = sol.tolerance
-                    minCTSol = sol
-                    minCTIndex = tempVios(i).ct
-               end if
-               if (sol.tolerance > maxCT) then
-                   maxCT = sol.tolerance
-                   maxCTSol = sol
-                   maxCTIndex = tempVios(i).ct
-               end if
-           end if
-           
-           !!calculate change if nct violation is excluded           
-           !write(output,10) vios(i).nct(1), vios(i).nct(2)
-           !sol = sol0  
-           !
-           !!generate new problem based on nct violation
-           !call calculateTolerance(sol, vios(i).nct)
-           !!put the new solution in the ascending order of tolerance
-           !subprobs(k) =  sol 
-           !k = k +1 
-           ! 
-           !!calculate the minimum nct tolerance
-           !if (i==1) then
-           !    minNCT = sol.tolerance
-           !    minNCTSol = sol
-           !    minNCTIndex = vios(i).nct
-           !else   
-           !    if (sol.tolerance < minNCT) then
-           !         minNCT = sol.tolerance
-           !         minNCTSol = sol
-           !         minNCTIndex = vios(i).nct
-           !    end if
-           !end if
-            
-        end do         
-        
-        !calculate bottle neck tolerance 
-        !set the sol with the min-min-max solution
-        !set the pivot 
-        !if (minCTSol.tolerance >= minNCTSol.tolerance) then
-            bottleNeck = maxCT
-            sol = maxCTSol
-            sol%pivot = maxCTIndex
-        !else
-        !    bottleNeck = minNCT
-        !    sol = minNCTSol
-        !    sol%pivot = minNCTIndex
-        !end if
-        
+        !k = 0
+        !do i = 1,  violationSize
+        !   
+        !   !calculate change if ct violation is excluded
+        !   !write(output,20) vios(i).ct(1), vios(i).ct(2)
+        !   sol = sol0                                                   !get the parent solution
+        !   !generate new problem pivoting on ct vviolation
+        !   call calculateTolerance(sol, tempVios(i).ct)
+        !   k = k + 1
+        !   subprobs(k) = sol
+        !    
+        !   !calculate the minimum ct tolerance 
+        !   if (i==1) then
+        !       minCT = sol.tolerance
+        !       minCTSol = sol
+        !       minCTIndex = tempVios(i).ct
+        !       maxCT = sol.tolerance
+        !       maxCTSol = sol
+        !       maxCTIndex = tempVios(i).ct
+        !   else    
+        !       if (sol.tolerance < minCT) then
+        !            minCT = sol.tolerance
+        !            minCTSol = sol
+        !            minCTIndex = tempVios(i).ct
+        !       end if
+        !       if (sol.tolerance > maxCT) then
+        !           maxCT = sol.tolerance
+        !           maxCTSol = sol
+        !           maxCTIndex = tempVios(i).ct
+        !       end if
+        !   end if            
+        !end do         
+        !bottleNeck = maxCT
+        !sol = maxCTSol
+        !sol%pivot = maxCTIndex
+
         !this block selects the CT violation producing maximum bottleneck tolerance
         ! WHICH DIDN'T GET EXCLUDED BEFORE (remove this block to stop overrriding bottlenexk and selected pivot)
         !sort subprob list in descending order by bubble sort comparing tolerance
-        swapped = .TRUE.
-        do while (swapped)
-            swapped = .FALSE.
-            DO i = 1, k-1
-              !swap if i-th tolerance is less then i+1 th tolerance  
-              IF (subprobs(i).tolerance < subprobs(i+1).tolerance) THEN
-                temp = subprobs(i)
-                subprobs(i) = subprobs(i+1)
-                subprobs(i+1) = temp
-                swapped = .TRUE.    
-              END IF
-            END DO
-        END DO
-        iloop: do i = 1, k
-            bottleNeck = subprobs(i).tolerance
-            sol = subprobs(i)
-            sol.pivot = subprobs(i).pivot
-            cont = .FALSE.
-            lloop: do l = 1, dim
-                if(sol0.exlmap(subprobs(i).pivot(1),l)) then
-                    cont = .TRUE.
-                end if    
-            end do lloop
-            if (.NOT. cont) then
-                exit iloop
-            end if    
-        end do iloop   
+        !swapped = .TRUE.
+        !do while (swapped)
+        !    swapped = .FALSE.
+        !    DO i = 1, k-1
+        !      !swap if i-th tolerance is less then i+1 th tolerance  
+        !      IF (subprobs(i).tolerance < subprobs(i+1).tolerance) THEN
+        !        temp = subprobs(i)
+        !        subprobs(i) = subprobs(i+1)
+        !        subprobs(i+1) = temp
+        !        swapped = .TRUE.    
+        !      END IF
+        !    END DO
+        !END DO
+        !iloop: do i = 1, k
+        !    bottleNeck = subprobs(i).tolerance
+        !    sol = subprobs(i)
+        !    sol.pivot = subprobs(i).pivot
+        !    cont = .FALSE.
+        !    lloop: do l = 1, dim
+        !        if(sol0.exlmap(subprobs(i).pivot(1),l)) then
+        !            cont = .TRUE.
+        !        end if    
+        !    end do lloop
+        !    if (.NOT. cont) then
+        !        exit iloop
+        !    end if    
+        !end do iloop   
         
         write(output,30) sol%pivot(1), sol%pivot(2), bottleNeck
         
@@ -463,12 +446,12 @@ module branchbound
         !solve the new solution by excluding the pivot
         z =  solveJVByExcluding(sol, violation, 3) 
         
-        if (isAssignmentVaild(sol)) then
+        !if (isAssignmentVaild(sol)) then
             t = z - LB                                           !calculate tolerance
             sol.tolerance = t                                    !set the tolerance to solution   
-        else
-            sol.tolerance = 0 
-        end if   
+        !else
+        !    sol.tolerance = 0 
+        !end if   
         
     end subroutine calculateTolerance
     
@@ -539,10 +522,11 @@ module branchbound
         integer :: cost
         
         !change the pivots to assignments as per the heuristic schedule
-        solx%pivot(2) = HSchedule(solx%pivot(1))
+        soln%pivot(1) = solx%pivot(1)
+        soln%pivot(2) = HSchedule(solx%pivot(1))
         
-        cost = solveJVByIncluding(soln, solx%pivot, 4)
-        cost = solveJVByExcluding(solx, solx%pivot, 3)
+        cost = solveJVByIncluding(soln, soln%pivot, 4)
+        cost = solveJVByExcluding(solx, solx%pivot, 2)
         
         !increase the depth of solutions at branch
         solx%depth = solx%depth + 1
@@ -555,23 +539,23 @@ module branchbound
         !should we first choose including or excluding? 
         !here whatever is minimum is chosen first
         if(solx.c.z >= soln.c.z) then
-            if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
-                solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
+            !if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
+                !solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
                 call push(solx, unvisited)
-            end if
-            if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
-                soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
+            !end if
+            !if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
+                !soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
                 call push(soln, unvisited)
-            end if
+            !end if
         else
-            if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
-                soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
+        !    if (.NOT. soln.incmap(soln%pivot(1),soln%pivot(2))) then
+                !soln.incmap(soln%pivot(1),soln%pivot(2)) = .TRUE.
                 call push(soln, unvisited)
-            end if
-            if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
-                solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
+            !end if
+            !if (.NOT. solx.exlmap(solx%pivot(1),solx%pivot(2))) then 
+                !solx.exlmap(solx%pivot(1),solx%pivot(2)) = .TRUE.               
                 call push(solx, unvisited)
-            end if
+            !end if
         end if
     
     end subroutine generateSubProblem
