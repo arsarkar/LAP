@@ -1,9 +1,6 @@
-
-# Created by https://www.gitignore.io/api/fortran
-
-### Fortran ###
 # Prerequisites
 *.d
+*.htm
 
 # Compiled Object files
 *.slo
@@ -14,6 +11,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.pdb
 
 # Compiled Dynamic libraries
 *.so
@@ -34,3 +32,4 @@
 *.exe
 *.out
 *.app
+*.exe.intermediate.manifest
